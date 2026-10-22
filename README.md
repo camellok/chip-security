@@ -43,9 +43,9 @@ LED 和 SCI 用于确认程序是否仍在运行。数值暂停更新、读取�
 
 | 例程 | 要回答的问题 | 演示与验收重点 | 当前状态 |
 | --- | --- | --- | --- |
-| [ex00_base_system](security_examples/ex00_base_system/README.md) | 未保护时，如何运行和观察模块？ | 验证 LED、SCI、按键及处理结果，建立正常工作的基线 | 已有 SPWM 基础工程；功能模块场景待调整 |
-| [ex01_dcsm_secure_flash](security_examples/ex01_dcsm_secure_flash/README.md) | 保护模块和参数后，APP 是否还能使用它？ | 锁定时功能正常，未授权回读受限，正确密码解锁后可读，断电后恢复保护 | 原 SPWM 版本已完成板级验证；新场景与布局待调整 |
-| [ex02_dcsm_debug](security_examples/ex02_dcsm_debug/README.md) | 调试器为什么有时能看到受保护内容？ | 对照自动解锁、软件锁定及解锁后的寄存器和调试可见性 | 原 SPWM 版本已通过10轮锁定/解锁及读取对照；新场景待调整 |
+| [ex00_base_system](security_examples/ex00_base_system/README.md) | 未保护时，如何运行和观察模块？ | 验证 LED、SCI、按键及处理结果，建立正常工作的基线 | 功能模块版本构建检查及简要板级回归通过（2026-10-22） |
+| [ex01_dcsm_secure_flash](security_examples/ex01_dcsm_secure_flash/README.md) | 保护模块和参数后，APP 是否还能使用它？ | 锁定时功能正常，未授权回读受限，正确密码解锁后可读，断电后恢复保护 | ZSB2 回读、锁定运行、按键解锁和断电恢复通过；相同布局读取保护对照已在 ex02 完成（2026-10-22） |
+| [ex02_dcsm_debug](security_examples/ex02_dcsm_debug/README.md) | 调试器为什么有时能看到受保护内容？ | 对照自动解锁、软件锁定及解锁后的寄存器和调试可见性 | 新模块版本3轮切换、代码及参数读取对照、断电恢复通过（2026-10-22）；旧 SPWM 版本10轮记录保留 |
 | `ex03_dcsm_exeonly` | 普通安全保护与 execute-only 有什么区别？ | 模块仍可执行，同 Zone 的代码对 execute-only 区域的数据读取受到限制 | 规划中 |
 | `ex04_dcsm_secure_ram` | 代码或工作数据需要放在 RAM 时，如何保护？ | 验证安全 RAM 的运行与数据访问，以及 Flash 加载镜像到 RAM 的同 Zone 搬运 | 规划中 |
 | `ex05_dcsm_flash_api` | 程序如何更新受保护的 Flash 内容？ | 以产品参数更新为场景，验证执行位置、Zone 权限、Flash 信号量与目标区域的关系 | 规划中 |
@@ -55,16 +55,16 @@ ex06 中的镜像认证、签名与完整性校验需单独设计。DCSM 密码�
 
 ### 代码与数据布局
 
-后续拟从 ex01 起统一分开存放模块代码和参数，使 ex03 能在保持参数保护的同时，仅对代码区增加 execute-only。
+ex01/ex02 已分开存放模块代码和参数，为 ex03 仅对代码区增加 execute-only 准备布局。ex00 的模块及参数均在普通 APP Flash。
 
-| 对象 | 规划位置 | 说明 |
+| 对象 | 位置 | 说明 |
 | --- | --- | --- |
 | APP、外设驱动及日志 | 普通 APP Flash | 用于启动、交互和结果观察 |
 | 厂家模块代码 | sector4，属于 Zone1 | ex01 使用普通安全保护；ex03 再增加 execute-only |
 | 产品只读参数 | sector5，属于 Zone1 | 保持普通安全属性，供同 Zone 模块按数据读取 |
 | 普通运行状态 | 非安全 RAM | 便于观察输入输出；ex04 再引入安全 RAM |
 
-这是后续布局，尚未应用到现有工程。当前 ex01/ex02 的 SPWM 函数和正弦表均在 sector4，索引和计算结果在非安全 RAM。原布局的验收记录继续保留，调整后需重新核对 map、OTP 配置及板级行为。
+当前模块计算 `output = input * 3 + 7`，用两个非安全 RAM 变量观察输入输出，保留实际参数读取。ex01/ex02 的代码在 sector4、参数在 sector5，并共用新的 Zone1 ZSB2；原 SPWM 版本的验收记录保留。构建和产物检查已通过，本轮板级回归按[简要回归表](docs/REGRESSION_EX00_EX02.md)执行。
 
 RAM 运行代码的 Flash 加载镜像必须能被搬运代码按数据读取。安排 execute-only 区域时，需要一并检查常量、查表数据和加载镜像的位置。
 

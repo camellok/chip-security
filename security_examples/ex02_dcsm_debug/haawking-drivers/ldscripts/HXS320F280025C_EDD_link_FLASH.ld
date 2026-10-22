@@ -56,7 +56,8 @@ MEMORY
     RAMGS0(rwx):                   ORIGIN = 0x00018000, LENGTH = 0x00002000     /* Internal RAM GS0 */
     BEGIN(rwx):                    ORIGIN = 0x00600000, LENGTH = 0x00000010     /* Code Entry */
     FLASH(rwx):                    ORIGIN = 0x00600010, LENGTH = 0x0000FFF0     /* APP Flash ends before sector4 */
-    FLASH_ZONE1_ALGO(rwx):         ORIGIN = 0x00610000, LENGTH = 0x00004000     /* Sector4: secure Zone1 algorithm */
+    FLASH_ZONE1_CODE(rwx):         ORIGIN = 0x00610000, LENGTH = 0x00004000     /* Zone1 module code: sector4 */
+    FLASH_ZONE1_PARAMS(r):         ORIGIN = 0x00614000, LENGTH = 0x00004000     /* Zone1 parameters: sector5 */
     USEROTP(rwx):                  ORIGIN = 0x007A0000, LENGTH = 0x00000800     /* User Otp for DCSM configuration */
     IER_REGISTER_FILE(rw):         ORIGIN = 0x00100C10, LENGTH = 0x00000004     /* IER Regitser */
     IFR_REGISTER_FILE(rw):         ORIGIN = 0x00100D10, LENGTH = 0x00000004     /* IFR Regitser */
@@ -160,14 +161,17 @@ SECTIONS
         __FLASH_RAMGS0_END = __FLASH_RAMGS0_START + (__RAMGS0_END - __RAMGS0_START);
     } > FLASH
 
-    /* Flash secure zone1 algorithm */
     . = 0x00610000;
-    flash_zone1_algo ALIGN(0x10):
+    module_code ALIGN(0x10):
     {
-    	*(algorithm_data)
-    	*(algorithm_sine_table)
-        *(algorithm_funcs)
-    } > FLASH_ZONE1_ALGO
+        *(module_code)
+    } > FLASH_ZONE1_CODE
+
+    . = 0x00614000;
+    module_params ALIGN(0x10):
+    {
+        *(module_params)
+    } > FLASH_ZONE1_PARAMS
 
     . = 0x00100C10;
     /* IER csr register */

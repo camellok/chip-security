@@ -18,7 +18,7 @@ MEMORY
     DCSM_OTP_Z1_CRCLOCK(rw):       ORIGIN = 0x007A0028, LENGTH = 0x00000008
     DCSM_OTP_Z1_JTAGLOCK(rw):      ORIGIN = 0x007A0030, LENGTH = 0x00000008
     DCSM_OTP_Z1_BOOTCTRL(rw):      ORIGIN = 0x007A0038, LENGTH = 0x00000008
-    DCSM_ZSEL_Z1(rw):              ORIGIN = 0x007A0040, LENGTH = 0x00000020/* DCSM Z1 Zone Select Contents (!!Movable!!) */
+    DCSM_ZSEL_Z1(rw):              ORIGIN = 0x007A0060, LENGTH = 0x00000020/* DCSM Z1 Zone Select Contents (!!Movable!!) */
 
     DCSM_OTP_Z2_LINKPOINTER(rw):   ORIGIN = 0x007A0400, LENGTH = 0x18
     DCSM_OTP_Z2_GPREG(rw):         ORIGIN = 0x007A0418, LENGTH = 0x08
@@ -73,7 +73,7 @@ SECTIONS
         KEEP(*(b0_dcsm_otp_z1_bootctrl))
     } > DCSM_OTP_Z1_BOOTCTRL
 
-    . = 0x007A0040;
+    . = 0x007A0060;
     .dcsm_zsel_z1 :
     {
         KEEP(*(b0_dcsm_zsel_z1))

@@ -1,76 +1,33 @@
-# ex00：基础系统
+# ex00：基础系统与功能模块
 
-本例程用于确认目标板、工具链和基本外设能够正常工作。程序通过轮询完成 LED 闪烁、按键检测和 SCI 日志，并周期性调用正弦查表函数。
+本例程检查 LED、按键、SCI，以及一个可供 APP 调用的产品功能模块。全程使用轮询，不配置 USER OTP。
 
-ex00 不配置 DCSM，也不查询 Zone1 的实际安全状态。运行本例程不会清除芯片已有的 OTP 配置。
+模块执行 `output = input * 3 + 7`。输入1～9循环，输出依次为10、13、16、19、22、25、28、31、34。后续例程沿用相同接口和参数，只改变内存保护与安全操作。
 
-## 实验环境与接线
+## 接线与运行
 
-工程目标为 HXS320F280025C_EDD，现有构建配置使用 Haawking IDE 2.3.17 和配套 RISC-V 工具链。准备目标板、下载或调试设备，以及连接 PC 的串口通路。
+目标为 HXS320F280025C_EDD，使用 Haawking IDE 2.3.17。GPIO31 为 LED，GPIO9 为低有效按键，GPIO28/29 为 SCIA RX/TX，串口为9600、8N1。
 
-| 功能 | 当前配置 |
-| --- | --- |
-| LED | GPIO31 |
-| 按键 | GPIO9，低电平表示按下 |
-| SCIA 接收 | GPIO28，连接串口适配器 TX |
-| SCIA 发送 | GPIO29，连接串口适配器 RX |
-| 串口格式 | 9600 baud，8 位数据，1 位停止位，无校验 |
-
-按目标板原理图确认引脚引出、串口电平和连接方式，并将串口适配器与目标板共地。板上的跳线、连接器及串联 0 Ω 电阻需要构成完整通路。
-
-## 构建与运行
-
-1. 在 Haawking IDE 中导入本目录的已有工程，选择 Debug 配置。
-2. 检查芯片型号和 Flash 链接脚本路径。当前使用 `haawking-drivers/ldscripts/HXS320F280025C_EDD_link_FLASH.ld`。
-3. 构建工程，确认生成 `Debug/ex00_base_system.elf`、`ex00_base_system.hex` 和 `ex00_base_system.map`。
-4. 将程序下载到 Flash。若芯片已有 DCSM 配置，下载权限和运行行为仍受已有配置影响。
-5. 先打开串口终端，再复位目标板。使用独立上电检查程序能否脱离调试器运行。
-
-## 运行现象
-
-上电后，串口输出一次：
+LED 每250 ms 翻转，串口持续输出输入和结果。按住 KEY 至少300 ms 后松开，串口打印 `[KEY] released.`。按住期间轮询等待松手，LED 和计算暂时暂停。
 
 ```text
-[DCSM] Zone1 Unsafty.
+[ex00] Module: output = input * 3 + 7.
+[MODULE] input=1 output=10
+[MODULE] input=2 output=13
 ```
 
-这是当前程序中的固定提示，不能据此判断芯片已解锁或处于非安全状态。
+## 代码与内存
 
-LED 初始按约 500 ms 的间隔翻转。按下并松开按键后，串口输出：
+`Algorithms/product_module.c` 包含模块函数 `ProductModule_Process()` 和只读参数 `g_module_params[2] = {3, 7}`。参数使用 const volatile，保留实际 Flash 数据读取，供后续保护演示使用。
 
-```text
-[Key] Press.
-```
+主程序只有两个全局观察量：非安全 RAM 中的 `g_module_input` 和 `g_module_output`。模块及参数的输入段 `module_code`、`module_params` 均由本例程 linker 收入普通 APP Flash 的 `text` 输出段，不使用 sector4/5。
 
-随后 LED 翻转间隔改为约 250 ms。程序使用阻塞式延时，按键在每轮 LED 操作和算法计算之后检测；过短的按键动作可能被漏检，操作时应适当保持按下，再松开。
+本例程不会清除已有 OTP，也不输出“Zone1 已解锁”之类未经查询的状态。已配置 ex01/ex02 的板可用于检查基础外设，但既有安全状态不会因此取消。
 
-## 算法观察
+## 构建与简要验收
 
-`Algorithms/spwm.c` 保存 256 点常量表，`spwm_duty_calc()` 每次调用取出一个表项，并更新索引。主循环将返回值乘以 1600，转换后写入 `g_epwm_cmp_value`。
+在 IDE 中重新生成构建文件，确认 `product_module.c` 参与编译。使用默认构建输出 `Debug/ex00_base_system.elf` 和 `Debug/ex00_base_system.hex`；本例程不输出 OTP 数据。
 
-| 观察对象 | 预期行为 |
-| --- | --- |
-| `g_sine_table_idx` | 在 0 至 255 之间循环 |
-| `g_sine_table_256` | 固定常量表，内容不变 |
-| `g_epwm_cmp_value` | 随每次查表结果更新 |
+下载后独立上电，确认 LED 闪烁、输入输出符合公式，再按一次 KEY 检查日志即可。自动构建检查与板级结果统一记录在[简要回归表](../../docs/REGRESSION_EX00_EX02.md)。
 
-当前程序仅计算变量，未将结果写入 ePWM 比较寄存器，因此不会据此输出 SPWM 波形。查表更新速度受主循环延时影响，不适合作为实际调制频率。
-
-## 主要文件
-
-| 文件或目录 | 用途 |
-| --- | --- |
-| `src/main.c` | 主循环、延时和按键处理 |
-| `src/board.c`、`src/board.h` | 引脚及外设配置 |
-| `Driver/` | LED、按键和 SCI 日志接口 |
-| `Algorithms/` | 正弦表及查表函数 |
-| `device/` | 器件初始化和时钟配置 |
-| `haawking-drivers/ldscripts/` | Flash、RAM 和外设的链接布局 |
-
-## 完成标准
-
-- 独立上电后，LED 闪烁，串口收到启动提示。
-- 按下并松开按键后，收到按键日志，LED 闪烁加快。
-- 能观察到索引循环、计算结果更新，常量表内容保持不变。
-
-以上检查通过后，可继续运行 [ex01](../ex01_dcsm_secure_flash/README.md)。遇到串口、启动或构建问题时，参阅[项目 FAQ](../../FAQ.md)。
+2026-10-22 开发者确认本次模块版本板级回归通过：独立上电 LED 正常闪烁，串口输入1～9循环且输出符合公式，按键松手打印一次日志后恢复运行。本次记录仅覆盖 ex00，不替代 ex01/ex02 的安全功能验证。

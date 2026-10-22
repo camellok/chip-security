@@ -15,14 +15,14 @@
 
 #----------------------------------------------------------------------
 # Bank0 Zone1 OTP LINKPOINTER
-# All three copies select ZSB1.
+# All three copies select ZSB2.
 #----------------------------------------------------------------------
 .section "b0_dcsm_otp_z1_linkpointer", "a", @progbits
-    .word 0x1FFFFFFF    # B0_Z1OTP_LINKPOINTER1
+    .word 0x1FFFFFFE    # B0_Z1OTP_LINKPOINTER1
     .word 0xFFFFFFFF    # Reserved
-    .word 0x1FFFFFFF    # B0_Z1OTP_LINKPOINTER2
+    .word 0x1FFFFFFE    # B0_Z1OTP_LINKPOINTER2
     .word 0xFFFFFFFF    # Reserved
-    .word 0x1FFFFFFF    # B0_Z1OTP_LINKPOINTER3
+    .word 0x1FFFFFFE    # B0_Z1OTP_LINKPOINTER3
     .word 0xFFFFFFFF    # Reserved
 
 #----------------------------------------------------------------------
@@ -66,7 +66,7 @@
 #   .word 0xFFFFFFFF    # Z1OTP_BOOTCTRL / BOOTDEF_HIGH
 
 #----------------------------------------------------------------------
-# Bank0 Zone1 ZSB1
+# Bank0 Zone1 ZSB2
 # Byte offsets are relative to the start of this block.
 # Offset +0x00 : EXEONLYRAM
 # Offset +0x04 : EXEONLYSECT
@@ -81,7 +81,7 @@
     .word 0xFFFFFFFF    # Z1OTP_EXEONLYRAM: execute-only disabled
     .word 0xFFFFFFFF    # B0_Z1OTP_EXEONLYSECT: execute-only disabled
     .word 0xFFFFAAFF    # Z1OTP_GRABRAM: LS4-LS7 = 10; reserved bits remain 1
-    .word 0xAAAAA9AA    # B0_Z1OTP_GRABSECT: sector4 = 01; other sectors = 10
+    .word 0xAAAAA5AA    # B0_Z1OTP_GRABSECT: sector4/5 = 01; other sectors = 10
 
     .word 0x11111111    # Z1OTP_CSMPSWD0
     .word 0x02222222    # Z1OTP_CSMPSWD1: keep factory-programmed zero bits
@@ -93,11 +93,11 @@
 # Inactive Bank1 reference; confirm device support and linker placement before use.
 #----------------------------------------------------------------------
 .section "b1_dcsm_otp_z1_linkpointer", "a", @progbits
-#   .word 0x1FFFFFFF    # B1_Z1OTP_LINKPOINTER1
+#   .word 0x1FFFFFFE    # B1_Z1OTP_LINKPOINTER1
 #   .word 0xFFFFFFFF    # Reserved
-#   .word 0x1FFFFFFF    # B1_Z1OTP_LINKPOINTER2
+#   .word 0x1FFFFFFE    # B1_Z1OTP_LINKPOINTER2
 #   .word 0xFFFFFFFF    # Reserved
-#   .word 0x1FFFFFFF    # B1_Z1OTP_LINKPOINTER3
+#   .word 0x1FFFFFFE    # B1_Z1OTP_LINKPOINTER3
 #   .word 0xFFFFFFFF    # Reserved
 
 #----------------------------------------------------------------------

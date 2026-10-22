@@ -54,7 +54,7 @@ MEMORY
     RAMLS4TO7(rwx):                ORIGIN = 0x00010000, LENGTH = 0x00008000     /* Internal RAM LS4 to LS7 */
     RAMGS0(rwx):                   ORIGIN = 0x00018000, LENGTH = 0x00002000     /* Internal RAM GS0 */
     BEGIN(rwx):                    ORIGIN = 0x00600000, LENGTH = 0x00000010     /* Code Entry */
-    FLASH(rwx):                    ORIGIN = 0x00600010, LENGTH = 0x0003FFF0     /* Internal Flash Bank0 */
+    FLASH(rwx):                    ORIGIN = 0x00600010, LENGTH = 0x0000FFF0     /* Internal Flash Bank0 */
     USEROTP(rwx):                  ORIGIN = 0x007A0000, LENGTH = 0x00000800     /* User Otp for DCSM configuration */
     IER_REGISTER_FILE(rw):         ORIGIN = 0x00100C10, LENGTH = 0x00000004     /* IER Regitser */
     IFR_REGISTER_FILE(rw):         ORIGIN = 0x00100D10, LENGTH = 0x00000004     /* IFR Regitser */
@@ -132,6 +132,8 @@ SECTIONS
         *(.text.init)
         *(.text)
         *(.text*)
+        *(module_code)
+        *(module_params)
         *(.IQmath.*)
         *(.srodata)
         *(.srodata*)
