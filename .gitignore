@@ -1,0 +1,23 @@
+# Local IDE workspace state
+**/.metadata/
+# Generated build outputs; regenerate in Haawking IDE
+**/Debug/
+**/Release/
+*.o
+*.d
+*.elf
+*.hex
+*.map
+*.siz
+*.stackdump
+# Device-specific OTP/readback backups (never publish)
+*_userotp_*.bin
+local_private/
+# OS/editor temporary files
+Thumbs.db
+Desktop.ini
+*.tmp
+*.bak
+
+# Local document rendering scratch files
+/tmp/
