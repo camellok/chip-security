@@ -1,0 +1,115 @@
+//###########################################################################
+//
+// FILE:   adc.c
+//
+// TITLE:  H28x ADC driver.
+//
+//###########################################################################
+
+#include "adc.h"
+#include "sysctl.h"
+
+//*****************************************************************************
+//
+// ADC_setVREF
+//
+//*****************************************************************************
+void
+ADC_setVREF(uint32_t base, ADC_ReferenceMode refMode,
+            ADC_ReferenceVoltage refVoltage)
+{
+    //
+    // Check the arguments.
+    //
+    ASSERT(ADC_isBaseValid(base));
+
+    //
+    // Only internal 2.5V and external reference is available
+    //
+    ASSERT(((refMode == ADC_REFERENCE_INTERNAL) && (refVoltage == ADC_REFERENCE_2_5V)) \
+	    || ((refMode == ADC_REFERENCE_INTERNAL) && (refVoltage == ADC_REFERENCE_VDDA))
+    	|| (refMode == ADC_REFERENCE_EXTERNAL));
+
+    //
+    // Configure the reference mode (internal or external, ADCA/C must setup to same mode).
+    //
+    EALLOW;
+
+    HWREG(ANALOGSUBSYS_BASE + ASYSCTL_O_PMULDOCTL) = 0;
+
+    if(refMode == ADC_REFERENCE_INTERNAL)
+    {
+		if(refVoltage == ADC_REFERENCE_2_5V)
+		{
+	    	HWREG(ANALOGSUBSYS_BASE + ASYSCTL_O_ANAREFCTL) = ASYSCTL_ANAREFCTL_ADCAVREFHIEN \
+	    													| ASYSCTL_ANAREFCTL_ADCCVREFHIEN;
+	    	HWREG(ADCACTL3_BASE + ADC_O_CTL3) |= ADC_CTL3_EN_VREFBI;
+	    	HWREG(ADCACTL3_BASE + ADC_O_CTL3) = ((HWREG(ADCACTL3_BASE + ADC_O_CTL3) & ~ADC_CTL3_SEL_VREFBI_M) \
+	    	    	    									| (0x2 << ADC_CTL3_SEL_VREFBI_S));
+			HWREG(ADCCCTL3_BASE + ADC_O_CTL3) |= ADC_CTL3_EN_VREFBI;
+			HWREG(ADCCCTL3_BASE + ADC_O_CTL3) = ((HWREG(ADCCCTL3_BASE + ADC_O_CTL3) & ~ADC_CTL3_SEL_VREFBI_M) \
+															| (0x2 << ADC_CTL3_SEL_VREFBI_S));
+		}
+		else
+		{
+			HWREG(ANALOGSUBSYS_BASE + ASYSCTL_O_ANAREFCTL) = ASYSCTL_ANAREFCTL_ANAREFAVDDSEL \
+												| ASYSCTL_ANAREFCTL_ANAREFCVDDSEL;
+		}
+    }
+    else
+	{
+		HWREG(ANALOGSUBSYS_BASE + ASYSCTL_O_ANAREFCTL) = 0;
+		HWREG(ADCACTL3_BASE + ADC_O_CTL3) |= ADC_CTL3_EN_VREFBI;
+		HWREG(ADCCCTL3_BASE + ADC_O_CTL3) |= ADC_CTL3_EN_VREFBI;
+	}
+
+    EDIS;
+	
+    SysCtl_deviceCal();
+}
+
+//*****************************************************************************
+//
+// ADC_setPPBTripLimits
+//
+//*****************************************************************************
+void
+ADC_setPPBTripLimits(uint32_t base, ADC_PPBNumber ppbNumber,
+                     int32_t tripHiLimit, int32_t tripLoLimit)
+{
+    uint32_t ppbHiOffset;
+    uint32_t ppbLoOffset;
+
+    //
+    // Check the arguments.
+    //
+    ASSERT(ADC_isBaseValid(base));
+    ASSERT((tripHiLimit <= 65535) && (tripHiLimit >= -65536));
+    ASSERT((tripLoLimit <= 65535) && (tripLoLimit >= -65536));
+
+    //
+    // Get the offset to the appropriate trip limit registers.
+    //
+    ppbHiOffset = (ADC_PPBxTRIPHI_STEP * (uint32_t)ppbNumber) +
+                  ADC_O_PPB1TRIPHI;
+    ppbLoOffset = (ADC_PPBxTRIPLO_STEP * (uint32_t)ppbNumber) +
+                  ADC_O_PPB1TRIPLO;
+
+    EALLOW;
+
+    //
+    // Set the trip high limit.
+    //
+    HWREG(base + ppbHiOffset) =
+        (HWREG(base + ppbHiOffset) & ~ADC_PPBTRIP_MASK) |
+        ((uint32_t)tripHiLimit & ADC_PPBTRIP_MASK);
+
+    //
+    // Set the trip low limit.
+    //
+    HWREG(base + ppbLoOffset) =
+        (HWREG(base + ppbLoOffset) & ~ADC_PPBTRIP_MASK) |
+        ((uint32_t)tripLoLimit & ADC_PPBTRIP_MASK);
+
+    EDIS;
+}

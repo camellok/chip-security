@@ -4,7 +4,7 @@
 
 `security_examples/` contains standalone Haawking IDE projects: `ex00_base_system`, `ex01_dcsm_secure_flash`, and `ex02_dcsm_debug`. Each project keeps application logic in `src/`, peripheral helpers in `Driver/`, and demonstration calculations in `Algorithms/`. `Security/` contains OTP assembly templates and the demonstration password header. Vendor sources and linker scripts live under `haawking-drivers/`; startup configuration lives under `device/`.
 
-`Debug/` contains generated build recipes and ELF, HEX, and map outputs. Root documents include `README.md`, `FAQ.md`, and `DCSM_ERRATA.md`. Planned examples and 2800137 support must be distinguished from implemented, verified behavior.
+`Debug/` contains generated build recipes and ELF, HEX, and map outputs. Root documents include `README.md`, `FAQ.md`, and `DCSM_ERRATA.md`. Planned examples and 280013x support must be distinguished from implemented, verified behavior.
 
 ## Build, Test, and Development Commands
 

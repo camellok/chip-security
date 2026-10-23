@@ -9,7 +9,7 @@
 | ex03：execute-only 对照 | 普通安全保护与 execute-only 对照；增加同 Zone 数据读取入口；代码可执行、独立参数可读，记录读取限制 |
 | ex04：安全 RAM | 代码或工作数据放入安全 RAM；检查 Flash load / RAM run 地址与同 Zone 搬运，验证锁定访问和断电行为 |
 | ex05～ex06：Flash 更新与升级 | 先验证 Flash API 运行位置、Zone 权限及信号量，再实现升级流程；镜像认证与完整性校验另行设计与验证 |
-| HX2800137 适配 | 建立独立平台工程，核对 RAM、Flash、OTP、LINKPOINTER、PSWDLOCK；增加 RAMOPEN / JTAGLOCK 例程并形成独立板级证据 |
+| HX280013x 适配 | ex00～ex02 已基于用户空白模板实现，构建及产物检查通过，见[独立回归表](REGRESSION_HX280013X_EX00_EX02.md)；待完成板级验收、密码隐藏对照，再增加 RAMOPEN / JTAGLOCK 例程 |
 | FORCESEC 后再解锁待确认项 | 确认推荐流程、初始化前提和最小补充读取序列；补齐芯片修订和 SDK 版本；不预设驱动或芯片缺陷 |
 | 客户应用笔记与交付验证 | 完成 user guide、培训材料、工具与接线清单、Flash / OTP 操作边界和版本化验证记录 |
 
