@@ -1,0 +1,84 @@
+
+MODULE SUMMARY
+
+                                                                                        File	/Algorithms/	/Driver/	/device/	/haawking-drivers/haawking-dsc2800137_ede-board/	/haawking-drivers/haawking-dsc2800137_ede-board/common/	/src/ 	Flash0CtrlRegs	comment	debug_frame	note.GNU-stack	rela.dyn	riscv.attributes
+--------------------------------------------------------------------------------------------	------------	--------	--------	------------------------------------------------	-------------------------------------------------------	----- 	--------------	-------	-----------	--------------	--------	----------------
+./device/
+                                                                                    device.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x65b         	0xa3   	0xd8       	0x0           	0x0     	0x2b            
+
+D:/Haawking-IDE-2.3.17/haawking-tools/segger_lib/
+                                                 libhaawking-segger_imfc.a(floatasmops_rv.o)	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0xa5e         	0x0    	0x270      	0x0           	0x0     	0x29            
+                                                       libhaawking-segger_imfc.a(floatops.o)	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x100         	0x42   	0x0        	0x0           	0x0     	0x2b            
+                                                   libhaawking-segger_imfc.a(strasmops_rv.o)	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x9c          	0x0    	0x70       	0x0           	0x0     	0x29            
+                                                         libhaawking-segger_imfc.a(intops.o)	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0xe6c         	0x41   	0x0        	0x0           	0x0     	0x2b            
+
+./Driver/
+                                                                                   Drv_Key.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x8f          	0xa3   	0x28       	0x0           	0x0     	0x2b            
+                                                                                   Drv_Led.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x95          	0xa3   	0x58       	0x0           	0x0     	0x2b            
+                                                                               Drv_Sci_Log.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x26          	0xa3   	0x28       	0x0           	0x0     	0x2b            
+
+./src/
+                                                                                      main.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x28f         	0xa3   	0x90       	0x0           	0x0     	0x2b            
+                                                                                     board.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x4c3         	0xa2   	0x2c       	0x0           	0x0     	0x2b            
+
+./haawking-drivers/haawking-dsc2800137_ede-board/common/
+                                                                                  syscalls.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x1766        	0xa3   	0x374      	0x0           	0x0     	0x2b            
+                                                                                       crt.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x144         	0x0    	0x0        	0x0           	0x0     	0x0             
+
+./Algorithms/
+                                                                            product_module.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x24          	0xa3   	0x24       	0x0           	0x0     	0x2b            
+
+./haawking-drivers/haawking-dsc2800137_ede-board/
+                                                                                    sysctl.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x963         	0xa3   	0x154      	0x0           	0x0     	0x2b            
+                                                                                     flash.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x1de         	0xa3   	0x28       	0x0           	0x0     	0x2b            
+                                                                      __disable_interrputs.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x6           	0x0    	0x0        	0x0           	0x0     	0x0             
+                                                                                      dcsm.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0xf3          	0xa3   	0x110      	0x0           	0x0     	0x2b            
+                                                                                       sci.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x434         	0xa3   	0xf8       	0x0           	0x0     	0x2b            
+                                                                                 interrupt.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x14c         	0xa3   	0xb0       	0x0           	0x0     	0x2b            
+                                                                                      gpio.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x3a0         	0xa3   	0xfc       	0x0           	0x0     	0x2b            
+                                                                              SysCtl_delay.o	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x26          	0x0    	0x0        	0x0           	0x0     	0x0             
+
+--------------------------------------------------------------------------------------------	----        	----    	----    	----                                            	----                                                   	----  	----          	----   	----       	----          	----    	----            
+                                                                                      Total:	0x0         	0x0     	0x0     	0x0                                             	0x0                                                    	0x0   	0x57ab        	0x96c  	0xde4      	0x0           	0x0     	0x302           
+
+MODULE SUMMARY
+
+                                                                                        File	Flash0CtrlRegs	comment	debug_frame	note.GNU-stack	rela.dyn	riscv.attributes
+--------------------------------------------------------------------------------------------	--------------	-------	-----------	--------------	--------	----------------
+./device/
+                                                                                    device.o	0x65b         	0xa3   	0xd8       	0x0           	0x0     	0x2b            
+
+D:/Haawking-IDE-2.3.17/haawking-tools/segger_lib/
+                                                 libhaawking-segger_imfc.a(floatasmops_rv.o)	0xa5e         	0x0    	0x270      	0x0           	0x0     	0x29            
+                                                       libhaawking-segger_imfc.a(floatops.o)	0x100         	0x42   	0x0        	0x0           	0x0     	0x2b            
+                                                   libhaawking-segger_imfc.a(strasmops_rv.o)	0x9c          	0x0    	0x70       	0x0           	0x0     	0x29            
+                                                         libhaawking-segger_imfc.a(intops.o)	0xe6c         	0x41   	0x0        	0x0           	0x0     	0x2b            
+
+./Driver/
+                                                                                   Drv_Key.o	0x8f          	0xa3   	0x28       	0x0           	0x0     	0x2b            
+                                                                                   Drv_Led.o	0x95          	0xa3   	0x58       	0x0           	0x0     	0x2b            
+                                                                               Drv_Sci_Log.o	0x26          	0xa3   	0x28       	0x0           	0x0     	0x2b            
+
+./src/
+                                                                                      main.o	0x38a         	0xa3   	0x9c       	0x0           	0x0     	0x2b            
+                                                                                     board.o	0x4c3         	0xa2   	0x2c       	0x0           	0x0     	0x2b            
+
+./haawking-drivers/haawking-dsc2800137_ede-board/common/
+                                                                                  syscalls.o	0x1766        	0xa3   	0x374      	0x0           	0x0     	0x2b            
+                                                                                       crt.o	0x144         	0x0    	0x0        	0x0           	0x0     	0x0             
+
+./Algorithms/
+                                                                            product_module.o	0x24          	0xa3   	0x24       	0x0           	0x0     	0x2b            
+
+./haawking-drivers/haawking-dsc2800137_ede-board/
+                                                                                    sysctl.o	0x963         	0xa3   	0x154      	0x0           	0x0     	0x2b            
+                                                                                     flash.o	0x1de         	0xa3   	0x28       	0x0           	0x0     	0x2b            
+                                                                      __disable_interrputs.o	0x6           	0x0    	0x0        	0x0           	0x0     	0x0             
+                                                                                      dcsm.o	0xf3          	0xa3   	0x110      	0x0           	0x0     	0x2b            
+                                                                                       sci.o	0x434         	0xa3   	0xf8       	0x0           	0x0     	0x2b            
+                                                                                 interrupt.o	0x14c         	0xa3   	0xb0       	0x0           	0x0     	0x2b            
+                                                                                      gpio.o	0x3a0         	0xa3   	0xfc       	0x0           	0x0     	0x2b            
+                                                                              SysCtl_delay.o	0x26          	0x0    	0x0        	0x0           	0x0     	0x0             
+
+--------------------------------------------------------------------------------------------	----          	----   	----       	----          	----    	----            
+                                                                                      Total:	0x58a6        	0x96c  	0xdf0      	0x0           	0x0     	0x302           

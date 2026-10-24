@@ -2,9 +2,9 @@
 
 ## Project Structure & Module Organization
 
-`security_examples/` contains standalone Haawking IDE projects: `ex00_base_system`, `ex01_dcsm_secure_flash`, and `ex02_dcsm_debug`. Each project keeps application logic in `src/`, peripheral helpers in `Driver/`, and demonstration calculations in `Algorithms/`. `Security/` contains OTP assembly templates and the demonstration password header. Vendor sources and linker scripts live under `haawking-drivers/`; startup configuration lives under `device/`.
+`topics/dcsm/examples/hx28002x/` contains standalone Haawking IDE projects: `ex00_base_system`, `ex01_dcsm_secure_flash`, `ex02_dcsm_debug`, `ex03_dcsm_exeonly`, and `ex04_dcsm_secure_ram`. Each project keeps application logic in `src/`, peripheral helpers in `Driver/`, and demonstration calculations in `Algorithms/`. `Security/` contains OTP assembly templates and the demonstration password header. Vendor sources and linker scripts live under `haawking-drivers/`; startup configuration lives under `device/`.
 
-`Debug/` contains generated build recipes and ELF, HEX, and map outputs. Root documents include `README.md`, `FAQ.md`, and `DCSM_ERRATA.md`. Planned examples and 280013x support must be distinguished from implemented, verified behavior.
+`topics/dcsm/examples/hx280013x/` contains the implemented ex00–ex02 projects for that platform. Each `Debug/` contains generated build recipes and ELF, HEX, and map outputs. Root `README.md` and `docs/` provide package navigation and common setup; DCSM documents live in `topics/dcsm/docs/`, and platform-specific evidence in `topics/dcsm/validation/`. Planned examples and broader 280013x support must be distinguished from implemented, verified behavior.
 
 ## Build, Test, and Development Commands
 
@@ -13,7 +13,7 @@ Use Haawking IDE 2.3.17 or its bundled tools. From the repository root in PowerS
 ```powershell
 $ide = 'D:\Haawking-IDE-2.3.17'
 $env:Path = "$ide\haawking-tools\compiler\Haawking-RISCV-LLVM\bin;$ide\haawking-tools\compiler\bin;$env:Path"
-make -C security_examples/ex02_dcsm_debug/Debug all
+make -C topics/dcsm/examples/hx28002x/ex02_dcsm_debug/Debug all
 ```
 
 Replace the example directory as needed. Use `-B all` to force rebuilding after linker changes. Prefer changing IDE settings over editing generated makefiles. When copying projects, check `.project`, `.cproject`, `.launch`, and absolute linker paths together.
@@ -35,3 +35,5 @@ This checkout is managed in the public camellok/chip-security GitHub repository.
 ## Security & Configuration
 
 Separate Flash updates from OTP programming; full HEX files can contain OTP sections. Back up device-specific OTP before intentional programming. Demo passwords are not production provisioning. Describe unresolved behavior neutrally: do not assume driver defects, future library fixes, or equivalent TI and Haawking behavior.
+
+ex03/ex04 prepare a shared Z1 ZSB3 profile for the current development board: sector4 execute-only, sector5 ordinary Zone1, and LS4 ordinary Zone1 RAM. APP data/bss/ramfunc move to LS5-LS7; ex04 initializes its separate NOLOAD LS4 work section from Zone1 code. Check all startup clear/copy ranges and real load/store instructions. Old ex00-ex02 binaries must not be loaded unchanged after enabling this profile. Fresh-device demonstrations starting at ZSB1 remain a separate release task. Never program OTP automatically.
