@@ -17,6 +17,21 @@
 
 公开资料中的密码为演示值。设备 OTP 备份、回读镜像和客户生产密钥应独立保管，不提交至本仓库。
 
+## 280013x例程进度（2026-10-24）
+
+| 项目 | 实现与构建 | 板级状态 / 下一步 |
+| --- | --- | --- |
+| ex00 基础系统 | 已完成，构建及产物检查通过 | 开发者反馈通过；逐项日志及工具信息待补录 |
+| ex01 安全Flash | 开发配置完成；完整ELF及双HEX检查通过 | 开发者反馈当前上板通过；补录分项结果、寄存器和OTP写后回读；PSWDLOCK密码隐藏对照尚未实现 |
+| ex02 调试访问 | 应用层PMF准备适配、可选OTP构建及产物检查完成；当前Exclude OTP | 开发者反馈板级通过；逐项日志、CR和轮数待补录 |
+| OTP模板与链接脚本 | 新增字段齐全，GPREG/EXEONLYSECT按组，保留位置仅注释，边界及组长度检查完成 | GRABSECT3按已接受推定布局实验；EXEONLYSECT2偏移推定且默认禁用，不算功能验收 |
+| 构建与下载产物 | 目标为默认ELF含APP+OTP、普通HEX仅Flash、_dcsm.hex含APP+OTP；ex01已核对，ex02主动Exclude OTP的构建已通过，ELF和两份HEX无OTP | 日常Flash更新按产物范围选择；构建不执行器件编程 |
+| ex03～ex04 | 规划中，280013x尚未实现 | 后续验证execute-only与安全LS0 RAM；28002x对应工程不计入本平台进度 |
+| ex05～ex06 | 规划中 | Flash API及Bootloader，先确认平台编程流程与权限 |
+| ex07～ex08 | 规划中 | RAMOPEN及JTAGLOCK，分别验证数据清除和调试授权 |
+
+证据与待填项见[280013x回归表](REGRESSION_HX280013X_EX00_EX02.md)，构建及下载边界见[双HEX说明](HX280013X_DUAL_HEX_BUILD.md)。当前具体目标仅为2800137_EDE / PM核心板，不扩展到其他型号、封装或修订。
+
 ## GitHub 跟踪
 
 - [Issue #1](https://github.com/camellok/chip-security/issues/1)

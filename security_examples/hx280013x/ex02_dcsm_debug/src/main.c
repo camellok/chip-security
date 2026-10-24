@@ -46,6 +46,49 @@ static void Print_Module_Result(void)
     Drv_Sci_Log_Print(line);
 }
 
+// Application-level preload experiment adapted from 28002x; see DCSM-002.
+// Read-only Zone1 preparation, not a replacement for BootROM initialization.
+static void Prepare_Zone1_Unlock(void)
+{
+    uint32_t linkPointer;
+    uint32_t zsbBase = DCSM_Z1OTP_BASE + 0x40U;
+    int32_t bitPos;
+
+    // Follow the 280013x Zone1 header order; DriverLib has no preload API.
+    (void)HWREG(DCSM_Z1OTP_BASE + DCSM_O_Z1OTP_LINKPOINTER1);
+    (void)HWREG(DCSM_Z1OTP_BASE + DCSM_O_Z1OTP_LINKPOINTER2);
+    (void)HWREG(DCSM_Z1OTP_BASE + DCSM_O_Z1OTP_LINKPOINTER3);
+    (void)HWREG(DCSM_Z1OTP_BASE + DCSM_O_Z1OTP_JLM_ENABLE);
+    (void)HWREG(DCSM_Z1OTP_BASE + DCSM_O_Z1OTP_GPREG1);
+    (void)HWREG(DCSM_Z1OTP_BASE + DCSM_O_Z1OTP_GPREG2);
+    (void)HWREG(DCSM_Z1OTP_BASE + DCSM_O_Z1OTP_GPREG3);
+    (void)HWREG(DCSM_Z1OTP_BASE + DCSM_O_Z1OTP_GPREG4);
+    (void)HWREG(DCSM_Z1OTP_BASE + DCSM_O_Z1OTP_PSWDLOCK);
+    (void)HWREG(DCSM_Z1OTP_BASE + 0x24U); // CRCLOCK: TRM; no SDK offset macro.
+    (void)HWREG(DCSM_Z1OTP_BASE + DCSM_O_Z1OTP_JTAGPSWDH0);
+    (void)HWREG(DCSM_Z1OTP_BASE + DCSM_O_Z1OTP_JTAGPSWDH1);
+
+    // Match this platform's DriverLib: low14 pointer bits, 0x40-byte ZSBs.
+    linkPointer = HWREG(DCSM_Z1_BASE + DCSM_O_Z1_LINKPOINTER);
+    for (bitPos = 13; bitPos >= 0; bitPos--) {
+        if ((linkPointer & (1UL << bitPos)) == 0U) {
+            zsbBase = DCSM_Z1OTP_BASE + ((uint32_t)bitPos + 2U) * 0x40U;
+            break;
+        }
+    }
+
+    // Active ZSB configuration only; skip reserved offsets and password words.
+    (void)HWREG(zsbBase + 0x10U); // GRABSECT1
+    (void)HWREG(zsbBase + 0x14U); // GRABSECT2
+    (void)HWREG(zsbBase + 0x18U); // GRABSECT3: accepted experimental layout.
+    (void)HWREG(zsbBase + 0x1CU); // GRABRAM1
+    (void)HWREG(zsbBase + 0x28U); // EXEONLYSECT1
+    (void)HWREG(zsbBase + 0x2CU); // EXEONLYSECT2: inferred layout, read only.
+    (void)HWREG(zsbBase + 0x30U); // EXEONLYRAM1
+    (void)HWREG(zsbBase + 0x38U); // JTAGPSWDL0
+    (void)HWREG(zsbBase + 0x3CU); // JTAGPSWDL1
+}
+
 static void Print_Zone1_Status(void)
 {
     char line[96];
@@ -95,6 +138,7 @@ int main(void)
                 DCSM_secureZone1();
             } else {
                 Drv_Sci_Log_Print("[DCSM] Request unlock.\r\n");
+                Prepare_Zone1_Unlock();
                 DCSM_unlockZone1CSM(&s_z1_demo_key);
             }
             Print_Zone1_Status();

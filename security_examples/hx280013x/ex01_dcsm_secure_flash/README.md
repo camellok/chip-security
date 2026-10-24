@@ -10,9 +10,9 @@
 
 ## 构建与下载
 
-导入 `ex01_dcsm_secure_flash`，让 IDE 重新生成构建文件。默认APP ELF和普通HEX不含OTP。每次Build生成 `Debug/ex01_dcsm_secure_flash.hex`（仅程序Flash）和 `Debug/ex01_dcsm_secure_flash_dcsm.hex`（程序Flash+DCSM配置），Clean/Rebuild同时清除两份HEX。构建原理、失败清理及手动命令见[双HEX构建说明](../../../docs/HX280013X_DUAL_HEX_BUILD.md)。使用应用层 `haawking-drivers/ldscripts/HXS320F2800137_EDE_link_FLASH.ld`，工程内已删除未使用的厂商原版Flash/RAM主脚本；[具体差异](../../../docs/HX280013X_LINKER_DIFF.md)已记录。
+导入 `ex01_dcsm_secure_flash`，让 IDE 重新生成构建文件。默认ELF包含APP和OTP配置；普通HEX不含OTP。现有launch下载默认ELF时也会包含OTP段，已配置OTP后的日常更新请使用普通HEX或工具支持的仅Flash下载设置。每次Build生成 `Debug/ex01_dcsm_secure_flash.hex`（仅程序Flash）和 `Debug/ex01_dcsm_secure_flash_dcsm.hex`（程序Flash+DCSM配置），Clean/Rebuild同时清除两份HEX。构建原理、失败清理及手动命令见[双HEX构建说明](../../../docs/HX280013X_DUAL_HEX_BUILD.md)。使用应用层 `haawking-drivers/ldscripts/HXS320F2800137_EDE_link_FLASH.ld`，工程内已删除未使用的厂商原版Flash/RAM主脚本；[具体差异](../../../docs/HX280013X_LINKER_DIFF.md)已记录。
 
-launch 保留模板自动解锁流程，Zone1演示密码与 `Security/hx280013x_dcsm_z1otp.S` 的四个显式密码字、`Security/password.h` 的应用解锁密钥保持一致。Post-build自动调用 `Security/BuildOtp.ps1` 重新构建OTP准备数据，并合成 `_dcsm.hex`；也可单独手动构建。所有脚本只生成文件，不编程器件。本例采用开发配置，PSWDLOCK保持出厂值，密码隐藏未实现。
+launch 保留模板自动解锁流程，Zone1演示密码与 `Security/hx280013x_dcsm_z1otp.S` 的四个显式密码字、`Security/password.h` 的应用解锁密钥保持一致。Post-build从同一默认ELF直接转换普通HEX和 `_dcsm.hex`。所有脚本只生成文件，不编程器件。本例采用开发配置，PSWDLOCK保持出厂值，密码隐藏未实现。
 
 ## 简要验收
 
@@ -24,4 +24,8 @@ launch 保留模板自动解锁流程，Zone1演示密码与 `Security/hx280013x
 
 ## 当前验证状态
 
-2026-10-23：构建及产物检查通过，板级待验证；详细证据与待填项见[280013x独立回归表](../../../docs/REGRESSION_HX280013X_EX00_EX02.md)。未继承28002x平台的板级验收结果。
+2026-10-24：开发者反馈当前ex01板级验证通过。记录为本平台、本示例的整体验证结论；本次未提供逐项日志、寄存器实测值、OTP写后回读或循环次数，详细记录见[280013x独立回归表](../../../docs/REGRESSION_HX280013X_EX00_EX02.md)。未继承28002x平台的板级验收结果。
+
+实现进度：安全Flash开发配置、完整OTP字段模板、GPREG/EXEONLYSECT分组和精简链接脚本已完成；完整ELF及双HEX的构建、Clean和输出范围检查通过。当前OTP为60字节，其中三个Zone1全1LINKPOINTER占12字节，ZSB密码及GRAB占48字节。普通HEX仅含程序Flash，默认ELF和_dcsm.hex含APP+OTP。
+
+后续工作：补录本例分项实测证据，另行实现并验证PSWDLOCK密码隐藏对照；该对照不计入当前开发配置的已完成范围。平台后续例程进度见[开发路线](../../../docs/ROADMAP.md)。

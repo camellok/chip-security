@@ -1,41 +1,50 @@
-# 280013x ex01/ex02：双HEX构建
+# 280013x ex01/ex02：默认完整ELF与双HEX构建
 
-普通Build会生成两份文件：
+状态更新：2026-10-24。ex01含OTP和ex02主动Exclude OTP两种构建均通过。ex02已加入应用层解锁准备，开发者反馈板级验证通过。源排除后的无OTP构建已支持，不再作为配置故障。详见[回归表](REGRESSION_HX280013X_EX00_EX02.md)。
 
-| 工程 | 仅程序Flash | 程序Flash和DCSM配置 |
+## 目标输出与当前差异
+
+按开发者要求，ex01/ex02的目标是各保留一份默认应用ELF，包含APP、调试符号和当前启用的OTP配置段。启用OTP源时符合下表；当前ex02保留开发者Exclude设置，ELF及两份HEX均不含OTP。
+
+| 文件 | 内容 | 使用方式 |
 | --- | --- | --- |
-| ex01 | `Debug/ex01_dcsm_secure_flash.hex` | `Debug/ex01_dcsm_secure_flash_dcsm.hex` |
-| ex02 | `Debug/ex02_dcsm_debug.hex` | `Debug/ex02_dcsm_debug_dcsm.hex` |
+| `Debug/<工程名>.elf` | APP＋OTP＋调试符号 | 现有launch使用此文件 |
+| `Debug/<工程名>.hex` | 仅程序Flash | 日常Flash更新 |
+| `Debug/<工程名>_dcsm.hex` | APP＋OTP | 有意编程OTP时使用 |
 
-正常名称的HEX用于日常程序Flash更新；`_dcsm.hex`包含OTP配置，仅在确认需要配置OTP时人工选择。构建脚本只生成文件，不执行任何下载。APP ELF始终不含OTP，现有launch继续使用APP ELF。
+默认ELF已包含OTP，因此通过现有launch下载该ELF时，下载器也会收到OTP段。已经编程过OTP的器件，后续更新应使用普通HEX，或使用工具明确支持的仅Flash下载设置。包含OTP段不保证密码或OTP始终可回读，实际读取仍取决于保护状态和工具行为。构建脚本不连接硬件，不自动编程OTP。
 
-## 执行顺序和原理
+## 工程配置
 
-1. **Pre-build**：删除两份旧HEX及临时文件，避免本轮编译/链接失败后误用上次的镜像。
-2. **编译与链接**：生成本轮APP ELF；两个OTP汇编源仍排除在APP构建之外，APP主脚本不包含 `DCSM.ld`。
-3. **Post-build**：`Security/BuildHex.ps1`调用IDE自带 `riscv32-haawking-elf-objcopy -O ihex --remove-section=.dcsm*`，生成不含DCSM的程序HEX临时文件，并检查所有数据记录位于程序Flash范围。
-4. 同一脚本调用 `Security/BuildOtp.ps1`，用当前OTP汇编和 `haawking-drivers/ldscripts/DCSM.ld`重新构建独立OTP ELF/HEX。当前默认配置输出48字节。
-5. 按绝对字节地址合并APP和OTP数据记录，生成 `_dcsm.hex`。合并检查校验和、地址范围、重复地址及APP/OTP重叠，重新核验合并结果；保持APP启动地址记录，不填充地址空洞。
-6. 两份HEX均核验成功后才发布最终文件。任一阶段失败则删除两份最终HEX和临时文件，并使构建报错。
+包含OTP时的配置（也支持主动Exclude后的无OTP模式）：
 
-转换必须在本轮链接结束后执行。Pre-build时本轮ELF尚不存在或仍是旧版本，因此Pre-build只清理，转换和合并在Post-build进行。
+1. `.cproject`中两个 `Security/hx280013x_dcsm_z1otp.S`、`hx280013x_dcsm_z2otp.S`参与正常编译，不再设置Exclude from Build。
+2. `haawking-drivers/ldscripts/HXS320F2800137_EDE_link_FLASH.ld`在APP布局之后包含 `DCSM.ld`。后者将启用的OTP段固定放到USER OTP地址，并用KEEP保留，避免被 `--gc-sections` 删除。
+3. `makefile.targets`把APP主脚本、Peripheral.ld、BootROM.ld和DCSM.ld列为ELF依赖；OTP源由IDE生成的编译规则跟踪，修改源或链接布局会重新链接默认ELF。
+4. `.launch`仍指向 `Debug/ex01_dcsm_secure_flash.elf` 或 `Debug/ex02_dcsm_debug.elf`；下载和符号使用该工程默认ELF，不增加第二份应用ELF或调试配置。
 
-这是对现有APP/OTP分离方案的扩展：不将OTP链接进调试用APP ELF，仅在HEX层生成完整镜像。`--remove-section=.dcsm*`按ELF输出段名过滤，APP地址范围校验提供额外检查；RAM运行函数和初始化data按Flash加载地址LMA进入程序HEX。
+IDE中Refresh工程并重新生成构建文件；不要手改Debug目录的生成makefile。
 
-## IDE配置与Clean
+## 构建顺序与实现原理
 
-`.cproject`配置非空的Pre-build/Post-build阶段并关闭默认单HEX转换，避免它与双HEX脚本重复生成同名文件。工程根目录的版本化 `makefile.targets`通过IDE生成makefile底部的include接入实际脚本：
+- Pre-build删除两份旧HEX及各自临时文件。
+- 正常编译和链接生成唯一的APP＋OTP ELF。
+- Post-build执行 `Security/BuildHex.ps1`，使用IDE自带objcopy从同一ELF转换两份文件：
 
-- `pre-build`及 `clean` 的前置规则删除两份HEX；因此Clean Project、Rebuild Project的清理阶段都会删除两份文件。
-- `post-build` 的前置规则生成两份HEX。IDE生成的配置命令带忽略错误前缀，实际脚本放在前置规则中执行，保证脚本失败会传递为make失败。
-- 每次执行标准Build/`make all`都会执行这两个阶段，即使APP无需重新链接，OTP源和OTP链接脚本仍会重新构建，因此只改OTP不会留下旧的 `_dcsm.hex`。
-- APP主链接脚本和两个映射依赖也显式列为ELF依赖，修改链接布局后会重新链接。
+```text
+riscv32-haawking-elf-objcopy -O ihex --remove-section=.dcsm* <工程名>.elf <工程名>.hex.tmp
+riscv32-haawking-elf-objcopy -O ihex <工程名>.elf <工程名>_dcsm.hex.tmp
+```
 
-不修改 `Debug/` 内的生成makefile。更新源码后在IDE中Refresh项目并重新生成构建文件。直接调用 `make main-build`、单个 `.elf`目标等内部目标会跳过完整构建阶段；发布HEX应执行Build Project或 `make all`。
+普通HEX按输出段名移除OTP，完整HEX直接保留ELF中的全部可转换数据。脚本不会修改ELF，也不再通过独立OTP ELF合并HEX。
 
-## 手动命令
+脚本检查Intel HEX校验和、记录长度、结束记录、重复地址和地址范围：普通HEX仅允许程序Flash `[0x00600000,0x00640000)`；完整HEX除完全一致的APP数据外，只允许USER OTP `[0x00640000,0x00640800)`，允许OTP数据为0字节。启动地址记录保持一致。不填充地址空洞；RAM运行函数和初始化data按Flash加载地址LMA进入HEX。两份文件均核验成功后才发布，失败则删除两份最终HEX和临时文件，并让make报错。
 
-先由IDE生成构建文件，再使用IDE工具链：
+## Clean与增量构建
+
+版本化 `makefile.targets`通过IDE生成makefile的include接入实际脚本。脚本放在pre-build、post-build的前置规则中，保证错误不会被IDE生成命令的忽略错误前缀掩盖。
+
+Clean Project、Rebuild Project清理两份HEX；每次标准Build/`make all`均重新转换两份HEX，即使ELF无需重链接。直接执行内部 `main-build`或单个ELF目标会跳过完整HEX构建阶段。
 
 ```powershell
 $ide = 'D:\Haawking-IDE-2.3.17'
@@ -44,27 +53,23 @@ make -C security_examples/hx280013x/ex01_dcsm_secure_flash/Debug all
 make -C security_examples/hx280013x/ex01_dcsm_secure_flash/Debug clean
 ```
 
-需要手动转换现有APP ELF时，在工程 `Debug` 目录执行：
+脚本默认IDE路径为 `D:\Haawking-IDE-2.3.17`，可通过 `-IdeRoot`覆盖。独立OTP构建脚本已删除，当前仅通过默认ELF生成两份HEX。历史 `Debug/otp/`产物不代表本轮默认Build结果。
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File ../Security/BuildHex.ps1 -ProjectName ex01_dcsm_secure_flash -BuildDirectory .
-```
+## 当前OTP差异
 
-脚本默认使用 `D:\Haawking-IDE-2.3.17`；安装路径不同时，可在 `makefile.targets` 的生成命令添加 `-IdeRoot`，或手动调用时指定该参数。使用Windows PowerShell 5.1即可，不依赖额外Python安装。
+ex01启用了Zone1三个LINKPOINTER，地址 `0x00640000/04/08`、值均为 `0xFFFFFFFF`，共新增12字节；ex02的OTP源码现已与ex01对齐，也启用这些字段；当前ex02排除了OTP源，实际产物不含OTP。两例原有ZSB密码及GRAB配置保持不变。全1LINKPOINTER的低14位表示ZSB1，不能将已经清零的OTP位恢复为1。GRABSECT3的ZSB偏移+0x18沿用开发者已接受的实验布局。
 
-## 验证范围
+旧的APP不含OTP、独立OTP合并方案已由本方案替代；旧回归记录仅表示当时的行为。
 
-本次验证覆盖IDE重新生成构建文件、两例Clean/Rebuild、无改动增量Build、隔离副本中只改OTP后的更新、OTP构建错误和APP构建错误后的双HEX清理。检查完整HEX恰好等于APP数据与当前48字节OTP数据的并集，默认HEX无OTP，且合并保留空洞。故障注入不修改实际工程的OTP配置，不连接硬件。
+## 2026-10-24默认完整ELF验证
 
-构建通过不代表OTP已写入，也不新增ex01/ex02板级验证结论。
+按开发者确认，ex01/ex02默认ELF改为包含APP和当前启用的OTP段；取消OTP源的构建排除，APP主脚本包含DCSM.ld。两份HEX均从同一ELF转换，普通HEX移除.dcsm*段，完整HEX保留。默认Build不再生成独立OTP ELF。
 
-## 2026-10-24验证结果
+两例Clean确认普通HEX和_dcsm.hex均被清除，随后完整重建通过。直接解析ELF段表及段数据，确认OTP地址和值与源码一致；独立objcopy转换结果与完整HEX逐字节相同，普通HEX仅含程序Flash，完整HEX精确等于普通HEX与OTP数据的并集，无填充。ex01保留开发者启用的Z1 LINKPOINTER，共60字节OTP；ex02为48字节。APP分别为22322、22570字节。ex01完整HEX内容及SHA256与修改ELF前的已核验文件一致。
 
-两例Clean、Rebuild、无改动增量Build均通过；无改动Build不重链接APP ELF，但会重新发布两份HEX。带空格路径的隔离副本中，仅修改OTP源后APP HEX与ELF保持不变，完整HEX中相应OTP字更新。OTP链接失败、APP构建失败均返回非零，并确认两份HEX及临时文件均不残留；恢复配置后可重新生成。
+此次未连接硬件、未编程OTP，也未新增板级验证结论。此前APP ELF不含OTP的记录仅描述旧方案；当前launch下载默认ELF会包含OTP段。
 
-| 示例 | 普通HEX有效字节 | DCSM有效字节 | `_dcsm.hex`有效字节 |
-| --- | --- | --- | --- |
-| ex01 | 22322 | 48 | 22370 |
-| ex02 | 22570 | 48 | 22618 |
 
-完整HEX的数据地址和值精确等于普通HEX与独立OTP HEX的并集，启动记录相同，没有空洞填充。没有执行硬件下载或OTP编程。
+## 排除OTP汇编源后的构建
+
+在IDE中将两个OTP汇编源设置为Exclude from Build并重新生成构建文件后，默认ELF不含OTP。此时BuildHex.ps1仍生成两份HEX，两者应用数据相同，均不含OTP；控制台明确输出 `OTP not present in ELF: both HEX files contain APP data only.`。`_dcsm`后缀不保证本轮ELF启用了OTP，实际内容以构建日志和地址记录为准。重新启用源文件后，完整HEX自动恢复包含OTP。切换排除设置后建议执行Rebuild，保证ELF反映当前源配置。地址、校验和和数据一致性检查继续保留。

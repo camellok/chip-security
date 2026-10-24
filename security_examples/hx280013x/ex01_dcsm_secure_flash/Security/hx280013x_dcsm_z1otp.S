@@ -11,11 +11,11 @@
 
 #----------------------------------------------------------------------
 # Template use
-# All fixed-header and ZSB fields are listed, including reserved words.
+# All fixed-header and ZSB fields are listed; reserved offsets are comments only.
 # Only the ex01/ex02 demonstration fields are enabled by default.
 # Enable complete password/key groups; never remove a word inside a group.
 # Each optional group has a fixed linker address; gaps are not filled.
-# Keep reserved words commented. Verify all factory bits before OTP use.
+# Never emit reserved words. Verify all factory bits before OTP use.
 #----------------------------------------------------------------------
 
 #----------------------------------------------------------------------
@@ -41,9 +41,9 @@
 # Byte address: 0x00640000. Optional; omitted from this image.
 #----------------------------------------------------------------------
 .section "b0_dcsm_otp_z1_linkpointer", "a", @progbits
-#   .word 0xFFFFFFFF    # Z1OTP_LINKPOINTER1: low14 = 0x3FFF selects ZSB1
-#   .word 0xFFFFFFFF    # Z1OTP_LINKPOINTER2: low14 = 0x3FFF selects ZSB1
-#   .word 0xFFFFFFFF    # Z1OTP_LINKPOINTER3: low14 = 0x3FFF selects ZSB1
+  .word 0xFFFFFFFF    # Z1OTP_LINKPOINTER1: low14 = 0x3FFF selects ZSB1
+  .word 0xFFFFFFFF    # Z1OTP_LINKPOINTER2: low14 = 0x3FFF selects ZSB1
+  .word 0xFFFFFFFF    # Z1OTP_LINKPOINTER3: low14 = 0x3FFF selects ZSB1
 
 #----------------------------------------------------------------------
 # Bank0 Zone1 OTP JLM_ENABLE
@@ -127,11 +127,9 @@
 
 #----------------------------------------------------------------------
 # Bank0 Zone1 ZSB1 RESERVED0
-# Byte offset +0x20. Optional; omitted from this image.
+# Byte offsets +0x20/+0x24 (no GRABRAM2/3). Reserved; no data is emitted.
 #----------------------------------------------------------------------
-.section "b0_dcsm_zsel_z1_reserved0", "a", @progbits
-#   .word 0xFFFFFFFF    # Reserved +0x20: no GRABRAM2 on this device
-#   .word 0xFFFFFFFF    # Reserved +0x24: no GRABRAM3 on this device
+# Reserved locations are documented here only; never emit data for them.
 
 #----------------------------------------------------------------------
 # Bank0 Zone1 ZSB1 EXEONLYSECTx
@@ -151,10 +149,9 @@
 
 #----------------------------------------------------------------------
 # Bank0 Zone1 ZSB1 RESERVED1
-# Byte offset +0x34. Optional; omitted from this image.
+# Byte offset +0x34. Reserved; no data is emitted.
 #----------------------------------------------------------------------
-.section "b0_dcsm_zsel_z1_reserved1", "a", @progbits
-#   .word 0xFFFFFFFF    # Reserved +0x34: leave unchanged
+# Reserved locations are documented here only; never emit data for them.
 
 #----------------------------------------------------------------------
 # Bank0 Zone1 ZSB1 JTAGPSWDL

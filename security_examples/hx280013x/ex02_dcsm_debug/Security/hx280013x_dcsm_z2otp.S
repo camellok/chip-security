@@ -11,11 +11,11 @@
 
 #----------------------------------------------------------------------
 # Template use
-# All fixed-header and ZSB fields are listed, including reserved words.
+# All fixed-header and ZSB fields are listed; reserved offsets are comments only.
 # Only the ex01/ex02 demonstration fields are enabled by default.
 # Enable complete password/key groups; never remove a word inside a group.
 # Each optional group has a fixed linker address; gaps are not filled.
-# Keep reserved words commented. Verify all factory bits before OTP use.
+# Never emit reserved words. Verify all factory bits before OTP use.
 #----------------------------------------------------------------------
 
 #----------------------------------------------------------------------
@@ -44,10 +44,9 @@
 
 #----------------------------------------------------------------------
 # Bank0 Zone2 OTP RESERVED0
-# Byte address: 0x0064040C. Optional; omitted from this image.
+# Byte address: 0x0064040C. Reserved; no data is emitted.
 #----------------------------------------------------------------------
-.section "b0_dcsm_otp_z2_reserved0", "a", @progbits
-#   .word 0xFFFFFFFF    # Reserved: leave unchanged
+# Reserved locations are documented here only; never emit data for them.
 
 #----------------------------------------------------------------------
 # Bank0 Zone2 OTP GPREGx
@@ -75,15 +74,9 @@
 
 #----------------------------------------------------------------------
 # Bank0 Zone2 OTP RESERVED1
-# Byte address: 0x00640428. Optional; omitted from this image.
+# Byte addresses: 0x00640428..0x0064043F. Reserved; no data is emitted.
 #----------------------------------------------------------------------
-.section "b0_dcsm_otp_z2_reserved1", "a", @progbits
-#   .word 0xFFFFFFFF    # Reserved +0x28: leave unchanged
-#   .word 0xFFFFFFFF    # Reserved +0x2C: leave unchanged
-#   .word 0xFFFFFFFF    # Reserved +0x30: leave unchanged
-#   .word 0xFFFFFFFF    # Reserved +0x34: leave unchanged
-#   .word 0xFFFFFFFF    # Reserved +0x38: leave unchanged
-#   .word 0xFFFFFFFF    # Reserved +0x3C: leave unchanged
+# Reserved locations are documented here only; never emit data for them.
 
 #----------------------------------------------------------------------
 # Bank0 Zone2 ZSB1 layout
@@ -118,11 +111,9 @@
 
 #----------------------------------------------------------------------
 # Bank0 Zone2 ZSB1 RESERVED0
-# Byte offset +0x20. Optional; omitted from this image.
+# Byte offsets +0x20/+0x24 (no GRABRAM2/3). Reserved; no data is emitted.
 #----------------------------------------------------------------------
-.section "b0_dcsm_zsel_z2_reserved0", "a", @progbits
-#   .word 0xFFFFFFFF    # Reserved +0x20: no GRABRAM2 on this device
-#   .word 0xFFFFFFFF    # Reserved +0x24: no GRABRAM3 on this device
+# Reserved locations are documented here only; never emit data for them.
 
 #----------------------------------------------------------------------
 # Bank0 Zone2 ZSB1 EXEONLYSECTx
@@ -141,18 +132,15 @@
 
 #----------------------------------------------------------------------
 # Bank0 Zone2 ZSB1 RESERVED1
-# Byte offset +0x34. Optional; omitted from this image.
+# Byte offset +0x34. Reserved; no data is emitted.
 #----------------------------------------------------------------------
-.section "b0_dcsm_zsel_z2_reserved1", "a", @progbits
-#   .word 0xFFFFFFFF    # Reserved +0x34: leave unchanged
+# Reserved locations are documented here only; never emit data for them.
 
 #----------------------------------------------------------------------
 # Bank0 Zone2 ZSB1 RESERVED2
-# Byte offset +0x38. Optional; omitted from this image.
+# Byte offsets +0x38/+0x3C. Reserved; no data is emitted.
 #----------------------------------------------------------------------
-.section "b0_dcsm_zsel_z2_reserved2", "a", @progbits
-#   .word 0xFFFFFFFF    # Reserved +0x38: leave unchanged
-#   .word 0xFFFFFFFF    # Reserved +0x3C: leave unchanged
+# Reserved locations are documented here only; never emit data for them.
 
 #----------------------------------------------------------------------
 # Unused ZSB slots

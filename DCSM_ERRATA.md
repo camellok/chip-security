@@ -110,3 +110,24 @@ DCSM_unlockZone1CSM(&s_z1_demo_key);
 5. 补齐芯片修订号、驱动发行包版本、回归次数及寄存器记录，再决定是否扩展验证 Zone2 和其他 ZSB。
 
 本条目保留原始现象与试验结果。获得新的证据后追加结论及适用条件，不覆盖原始记录。
+
+
+## DCSM-002：280013x ex02 FORCESEC后再次解锁失败
+
+2026-10-24开发者反馈280013x ex02按键锁定后无法再次解锁，尚未提供失败现场CR或逐阶段日志。该现象与DCSM-001的28002x记录相似，但根因和平台等价性未确认；ex01此前的板级通过结论保持。
+
+开发者要求参照28002x应用层方案适配。280013x ex02现新增私有 `Prepare_Zone1_Unlock()`，在原始 `DCSM_unlockZone1CSM()` 前执行，只进行volatile读取，不写OTP，不修改厂商驱动：
+
+1. Zone1 OTP依次读取LINKPOINTER1/2/3、JLM_ENABLE、GPREG1/2/3/4、PSWDLOCK、CRCLOCK、JTAGPSWDH0/1。CRCLOCK采用TRM所列+0x24，SDK未提供该偏移宏。
+2. 读取运行时Zone1 LINKPOINTER，扫描bit13至bit0；全1选择OTP_BASE+0x40，否则与本平台DriverLib相同，按OTP_BASE+(bitPos+2)*0x40计算活动ZSB。
+3. 按280013x布局读取活动ZSB的GRABSECT1/2/3（+0x10/+0x14/+0x18）、GRABRAM1（+0x1C）、EXEONLYSECT1/2（+0x28/+0x2C）、EXEONLYRAM1（+0x30）、JTAGPSWDL0/1（+0x38/+0x3C），跳过保留位置。GRABSECT3+0x18沿用已接受的实验定义；EXEONLYSECT2+0x2C仍为推定布局，本次仅读取，不启用该字段的OTP输出。
+4. 原始DriverLib继续完成四次密码虚读和四次KEY写入。
+
+TRM V1.3安全初始化说明列出了两Zone的头部及ZSB配置虚读，并说明完整安全初始化由BootROM执行、顺序重要。此函数仅提取Zone1作为应用解锁前的试验准备，未实现两Zone完整BootROM初始化，也不将所有读取认定为最小必要序列。
+
+构建通过。反汇编确认函数位于普通APP Flash（本次0x00600852），12次头部读取、1次运行时LINKPOINTER读取和9次ZSB配置读取均为真实32位lw；原始驱动中的四次密码读取和KEY写入保留。厂商dcsm.c的SHA256前后均为9C63CB9850D8A3488C71A7154D2F0B0F8FC18DE882B7833A018A390DDA2C1EA4。当前OTP源仍由开发者Exclude，本轮应用HEX为22706字节，ELF及两份HEX无OTP。未连接硬件，规避效果待板级复测。
+
+复测顺序：仅更新应用Flash；断电启动后按键解锁，再锁定、再次解锁。记录各次CR>>16与计算恢复情况，先完成3轮，再累计10轮，并确认断电后恢复secure。调试期间关闭OTP自动刷新窗口，避免额外读取干扰初始化顺序。
+
+
+2026-10-24板级复测反馈：开发者确认“这样子可行，我认为ex02通过”。应用层准备读取方案在当前280013x ex02获得板级通过反馈；未补报具体循环次数或寄存器值。该反馈不确认最小必要序列或芯片/驱动根因，不扩展到其他Zone和槽位。

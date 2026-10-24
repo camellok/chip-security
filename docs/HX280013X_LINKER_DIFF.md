@@ -2,7 +2,7 @@
 
 日期：2026-10-24。比较基线为用户提供的2800137_EDE模板中 `haawking-drivers/ldscripts/HXS320F2800137_EDE_link_FLASH.ld`；该原版文件可从Git提交 `5438c9a` 获取，无需在各工程内保留副本。
 
-修改后的应用Flash主脚本已放回各工程的 `haawking-drivers/ldscripts/`，布局内容保持不变；原版副本与未使用RAM脚本不保留。ex01和ex02的应用Flash脚本完全相同。
+修改后的应用Flash主脚本已放回各工程的 `haawking-drivers/ldscripts/`，布局内容保持不变；原版副本与未使用RAM脚本不保留。ex01和ex02的应用Flash脚本完全相同。主脚本包含DCSM.ld，但这不等于OTP源已参与构建：ex02当前主动排除两个OTP汇编源，ELF无OTP；脚本已支持无OTP构建并完成复验，见[当前状态](REGRESSION_HX280013X_EX00_EX02.md)。
 
 ## 布局差异
 
@@ -15,7 +15,7 @@
 | 模块段保留 | 无对应KEEP | 沿用正常引用和垃圾回收规则 | 使用 `KEEP`，避免演示段被 `--gc-sections` 删除 |
 | 链接断言 | 无本例专用断言 | 未新增 | 代码段不超过0x4000；参数段必须8字节；APP加载镜像末地址不超过0x00610000 |
 | RAM及启动搬运 | M0放ramfunc，LS0放data/bss，加载镜像在普通Flash | 相同 | 相同，加载镜像限制在APP Flash内 |
-| USER OTP | 不包含OTP段 | 不包含OTP段 | 不包含OTP段；OTP由独立 `haawking-drivers/ldscripts/DCSM.ld` 构建 |
+| USER OTP | 不包含OTP段 | 不包含OTP段 | 主脚本包含 `haawking-drivers/ldscripts/DCSM.ld`，默认ELF含APP+OTP；普通HEX移除OTP，_dcsm.hex保留 |
 
 ex01/ex02没有将剩余的 `0x00618000`～`0x0063FFFF` 分配给APP，因此普通APP可用空间确实比原版小；APP增长超过边界时应调整布局，而不是让其进入模块区。
 
@@ -95,10 +95,10 @@ ex01/ex02没有将剩余的 `0x00618000`～`0x0063FFFF` 分配给APP，因此普
 
 每个工程将修改后的 `HXS320F2800137_EDE_link_FLASH.ld` 放回 `haawking-drivers/ldscripts/`，作为唯一Flash主脚本。该文件使用本文说明的应用布局，原版副本不保留，未使用的RAM主脚本仍删除。
 
-`haawking-drivers/ldscripts/Peripheral.ld` 和 `BootROM.ld` 是应用脚本正在包含的地址映射依赖，继续保留且内容不改。ex01/ex02另保留独立OTP构建脚本，不进入默认APP链接。
+`haawking-drivers/ldscripts/Peripheral.ld` 和 `BootROM.ld` 是应用脚本正在包含的地址映射依赖，继续保留且内容不改。ex01/ex02默认APP主脚本现包含DCSM.ld，使启用的OTP段进入默认ELF；普通HEX转换时移除这些段。
 
 IDE `.cproject` 删除原版Flash文件的冗余排除项，逐文件排除 `Security/hx280013x_dcsm_z1otp.S` 和 `Security/hx280013x_dcsm_z2otp.S`；链接器仅需 `../haawking-drivers/ldscripts` 搜索路径来解析Flash主脚本及两个映射依赖；C编译器的 `../src` 头文件搜索路径保留。工程仍使用FLASH配置，本次不提供RAM运行版本。28002x工程不在此次删除范围内。
 
 清理后验证：三个工程由IDE重新生成构建文件，并分别强制重编译通过；应用主脚本与清理前SHA-256一致，两个映射依赖内容一致。map/符号检查确认RAM布局、APP加载镜像和模块地址保持预期；APP HEX校验通过且不包含OTP。本次未连接硬件。
 
-2026-10-24排版整理：Flash主脚本使用与28002x相同的 `. = 地址;` 加多行段块格式，安全Flash区域命名统一为 `FLASH_ZONE1_CODE` / `FLASH_ZONE1_PARAMS`。运行/加载地址和段收集逻辑不变。独立OTP链接脚本统一命名为 `DCSM.ld` 并放在ldscripts目录，使用显式MEMORY / SECTIONS，仍不被APP主脚本包含。
+2026-10-24排版整理：Flash主脚本使用与28002x相同的 `. = 地址;` 加多行段块格式，安全Flash区域命名统一为 `FLASH_ZONE1_CODE` / `FLASH_ZONE1_PARAMS`。运行/加载地址和段收集逻辑不变。独立OTP链接脚本统一命名为 `DCSM.ld` 并放在ldscripts目录，使用显式MEMORY / SECTIONS，现按开发者要求被APP主脚本包含，启用的OTP段进入默认ELF。

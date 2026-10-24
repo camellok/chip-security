@@ -177,3 +177,6 @@ SECTIONS
     /* End */
     _end = .;
 }
+
+/* Include enabled OTP configuration in the default application ELF. */
+INCLUDE "DCSM.ld"
