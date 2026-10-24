@@ -34,6 +34,7 @@ Chip_Security/
         ├── examples/
         │   ├── hx28002x/          # ex00～ex04
         │   └── hx280013x/         # ex00～ex02
+        ├── templates/             # 独立 OTP 参考模板
         └── validation/            # 按芯片保留验证记录
 ```
 

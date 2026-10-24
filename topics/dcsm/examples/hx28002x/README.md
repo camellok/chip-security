@@ -6,11 +6,13 @@
 | --- | --- | --- |
 | [ex00](ex00_base_system/README.md) | 未保护的基础系统与功能模块 | 2026-10-22 简要板级回归通过 |
 | [ex01](ex01_dcsm_secure_flash/README.md) | 模块代码与参数的普通安全 Flash 保护 | ZSB2、锁定运行、解锁及断电恢复通过 |
-| [ex02](ex02_dcsm_debug/README.md) | 调试访问、锁定与解锁的读取对照 | 新模块版本3轮、读取对照及断电恢复通过；历史 SPWM 版本10轮记录独立保留 |
+| [ex02](ex02_dcsm_debug/README.md) | 调试访问、锁定与解锁的读取对照 | 新模块版本 3 轮、读取对照及断电恢复通过；历史 SPWM 版本 10 轮记录独立保留 |
 | [ex03](ex03_dcsm_exeonly/README.md) | execute-only 与普通安全保护对照 | 实现、构建及产物检查通过，板级待验证 |
 | [ex04](ex04_dcsm_secure_ram/README.md) | Zone1 RAM 工作数据保护 | 实现、构建及产物检查通过，板级待验证 |
 
 ex05～ex06 尚为规划，详见[开发路线](../../../../docs/ROADMAP.md)。芯片差异见[平台对照](../../docs/chip_differences.md)，主题原理与学习路线见[DCSM 入口](../../README.md)。
+
+独立的 [28002x OTP 参考模板](../../templates/hx28002x/README.md)提供字段骨架，默认不输出 OTP 数据；各例程仍使用自己 `Security/` 中的配置。
 
 ## 当前开发板配置兼容性
 

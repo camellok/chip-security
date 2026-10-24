@@ -2,21 +2,65 @@
 
 本专题介绍昊芯 DSC 的 CSM / DCSM 代码与数据保护，包含普通安全 Flash、调试访问控制、execute-only 与安全 RAM 例程。共同原理统一说明，实际工程与验证记录按芯片平台区分。
 
-已有板级验证与规划内容分别标注。不同芯片使用差异见[平台对照](docs/chip_differences.md)，后续工作见 [开发路线](../../docs/ROADMAP.md)。
+28002x 已有 ex00～ex04，280013x 已有 ex00～ex02。各例程分别标明实现、构建检查和板级验证状态。芯片使用差异见[平台对照](docs/chip_differences.md)，后续工作见[开发路线](../../docs/ROADMAP.md)。
+
+## 目录与文件用途
+
+```text
+dcsm/
+├── README.md                         # 本专题入口、演示场景和例程状态
+├── docs/
+│   ├── chip_differences.md            # 两个平台的内存、OTP 与操作差异
+│   ├── faq.md                         # 构建、启动、调试和读取问题
+│   ├── errata.md                      # 已观察现象、试验依据及待确认项
+│   ├── HX280013X_DUAL_HEX_BUILD.md     # 280013x 产物生成及下载范围
+│   └── HX280013X_LINKER_DIFF.md        # 280013x 链接布局的修改依据
+├── examples/
+│   ├── hx28002x/                     # 平台说明及 ex00～ex04 独立工程
+│   └── hx280013x/                    # 平台说明及 ex00～ex02 独立工程
+├── templates/                        # 独立 OTP 参考模板，不是例程配置
+└── validation/
+    ├── hx28002x/                     # 回归结果、构建证据与 history/ 历史记录
+    └── hx280013x/                    # 构建证据、板级反馈及待补录项
+```
+
+平台 README 汇总板卡资源、内存布局和配置兼容关系；工程 README 提供该实验的操作步骤。`validation/` 保存验证证据，历史记录只说明当时版本的结果。
+
+各独立工程中的文件用途如下。ex00 不含用于配置保护的 `Security/` 文件。
+
+| 路径或文件 | 用途 |
+| --- | --- |
+| `src/` | 主程序、按键处理和安全操作流程 |
+| `Driver/` | LED、SCI 等板级外设辅助函数 |
+| `Algorithms/` | 厂家功能模块及产品参数 |
+| `Security/` | 例程 OTP 汇编、演示密码；280013x ex01/ex02 还包含 HEX 构建脚本 |
+| `device/` | 器件、时钟及启动相关配置 |
+| `haawking-drivers/` | 厂商驱动及链接脚本；`ldscripts/` 决定段的运行和加载位置 |
+| `lib/` | DriverLib、数学库等预编译库文件 |
+| `config/` | 调试器连接与目标器件配置 |
+| `.settings/` | IDE 语言和工程设置 |
+| `.project`、`.cproject`、`.launch` | IDE 工程、构建与调试配置 |
+| `makefile.targets` | 280013x ex01/ex02 的双 HEX 构建依赖与清理规则 |
+| `Debug/` | IDE 生成的构建规则及 ELF、HEX、map，不纳入版本控制 |
+
+## 推荐阅读顺序
+
+1. 阅读[通用环境说明](../../docs/getting_started.md)及[芯片差异](docs/chip_differences.md)，选择目标平台。
+2. 打开 [28002x 平台说明](examples/hx28002x/README.md)或 [280013x 平台说明](examples/hx280013x/README.md)，核对接线、时钟及已有 OTP 配置。
+3. 按 ex00、ex01、ex02 的顺序完成基础运行、安全 Flash 和调试读取实验；每次实验对照工程 README 与对应回归记录。
+4. 28002x 后续开展 ex03/ex04 前，先阅读共享 ZSB3 的配置与兼容限制。280013x 的后续例程仍在规划中。
+
+准备自定义 OTP 配置时再查阅[独立模板说明](templates/README.md)；模板与例程中的 `Security/` 分别维护，修改模板不会自动改变例程。
 
 ## 获取与导入
 
 使用 Haawking IDE 2.3.17，在独立工作空间中通过 Existing Projects 导入 `topics/dcsm/examples/<芯片平台>/` 下所需工程，确认目标芯片后执行构建。仓库保留源码、库文件、链接脚本和工程配置；IDE 工作空间缓存与 `Debug/` 生成物不纳入版本控制。首次克隆或目录迁移后请先由 IDE 重新导入并生成构建文件，再按各工程 README 操作。通用步骤见[环境与导入说明](../../docs/getting_started.md)。
 
-本地维护目录为 `D:\ApplicationNotes_Release\Chip_Security`，客户可克隆到自己的目录。更换工具链目录时应同步检查 IDE 工具链设置。完整 HEX 可能含 OTP 配置，下载前务必核对输出范围。
+仓库可克隆到自己的工作目录。更换工具链目录时应同步检查 IDE 工具链设置。完整 HEX 可能含 OTP 配置，下载前务必核对输出范围。
 
 设备专用 OTP 备份与回读数据仅在本地保管，公开仓库只包含演示配置；请在任何 OTP 编程前自行备份目标器件。
 
-本项目通过一组板级例程介绍安全区域划分、密码解锁和访问限制。完成培训后，应能根据应用需求安排代码与数据的位置，配置 OTP，并通过寄存器、串口日志和内存回读判断配置是否生效。
-
-培训资料包括 demo、user guide 和 PPT，当前先完成 demo 及其验证记录。本文是例程总入口，具体操作见各工程的 README。
-
-例程尚未定版。下文区分已验证的工程与后续设计，使用前请先确认目标芯片和对应工程的状态。
+例程通过区域归属、安全状态寄存器、串口日志和内存回读，演示代码与数据的位置如何影响访问权限。当前资料以例程及验证记录为主，独立 user guide 和培训 PPT 待补充。例程仍在完善，使用前请核对下表的适用平台与状态。
 
 ## 演示场景：厂家功能模块与产品参数
 
@@ -45,7 +89,7 @@ LED 和 SCI 用于确认程序是否仍在运行。数值暂停更新、读取�
 | --- | --- | --- | --- |
 | [ex00_base_system](examples/hx28002x/ex00_base_system/README.md) | 未保护时，如何运行和观察模块？ | 验证 LED、SCI、按键及处理结果，建立正常工作的基线 | 功能模块版本构建检查及简要板级回归通过（2026-10-22） |
 | [ex01_dcsm_secure_flash](examples/hx28002x/ex01_dcsm_secure_flash/README.md) | 保护模块和参数后，APP 是否还能使用它？ | 锁定时功能正常，未授权回读受限，正确密码解锁后可读，断电后恢复保护 | ZSB2 回读、锁定运行、按键解锁和断电恢复通过；相同布局读取保护对照已在 ex02 完成（2026-10-22） |
-| [ex02_dcsm_debug](examples/hx28002x/ex02_dcsm_debug/README.md) | 调试器为什么有时能看到受保护内容？ | 对照自动解锁、软件锁定及解锁后的寄存器和调试可见性 | 新模块版本3轮切换、代码及参数读取对照、断电恢复通过（2026-10-22）；旧 SPWM 版本10轮记录保留 |
+| [ex02_dcsm_debug](examples/hx28002x/ex02_dcsm_debug/README.md) | 调试器为什么有时能看到受保护内容？ | 对照自动解锁、软件锁定及解锁后的寄存器和调试可见性 | 新模块版本 3 轮切换、代码及参数读取对照、断电恢复通过（2026-10-22）；旧 SPWM 版本 10 轮记录保留 |
 | [ex03_dcsm_exeonly](examples/hx28002x/ex03_dcsm_exeonly/README.md) | 普通安全保护与 execute-only 有什么区别？ | 模块仍可执行，同 Zone 的代码对 execute-only 区域的数据读取受到限制 | 示例已实现，构建及产物检查通过；板级待验证 |
 | [ex04_dcsm_secure_ram](examples/hx28002x/ex04_dcsm_secure_ram/README.md) | 工作数据放在 RAM 时，如何保护？ | Zone1 模块初始化和读写安全 RAM，APP / 调试器直接读取对照；本版不搬运代码到安全 RAM | 示例已实现，构建及产物检查通过；板级待验证 |
 | `ex05_dcsm_flash_api` | 程序如何更新受保护的 Flash 内容？ | 以产品参数更新为场景，验证执行位置、Zone 权限、Flash 信号量与目标区域的关系 | 规划中 |
@@ -87,13 +131,11 @@ ex03 使用相同的功能接口与产品参数，对照普通安全保护和 ex
 
 ## 280013x 平台
 
-<!-- BEGIN 280013x PLAN: 本区域留给 280013x 规划编写；不要将 28002x 的地址、字段或验证结果直接复制为该平台结论。 -->
-
-280013x 沿用厂家功能模块与产品参数的演示场景，保留 ex00 至 ex06，增加 RAMOPEN 和 JTAGLOCK 两个例程。截至2026-10-24，已建立独立的 [280013x ex00～ex02 工程](examples/hx280013x/README.md)，已有构建检查记录；开发者反馈ex00、ex01上板通过，ex02保留OTP源Exclude，无OTP ELF及双HEX构建通过，开发者反馈板级通过，分项证据待补录；ex03～ex08仍为规划。
+280013x 沿用厂家功能模块与产品参数的演示场景，保留 ex00 至 ex06，增加 RAMOPEN 和 JTAGLOCK 两个例程。截至 2026-10-24，已建立独立的 [280013x ex00～ex02 工程](examples/hx280013x/README.md)，已有构建检查记录；开发者反馈 ex00、ex01 上板通过，ex02 保留 OTP 源 Exclude，无 OTP ELF 及双 HEX 构建通过，开发者反馈板级通过，分项证据待补录；ex03～ex08 仍为规划。
 
 ### 平台与开发环境
 
-平台统称为280013x，当前具体目标为 HXS320F2800137_EDE 和 PM核心板，使用开发者提供的空白 DriverLib 工程及 Haawking IDE 2.3.17。接线、20 MHz晶振、160 MHz系统时钟、工程导入和OTP配置见[平台说明](examples/hx280013x/README.md)，产物与下载范围见[双HEX构建说明](docs/HX280013X_DUAL_HEX_BUILD.md)。其他型号/封装不视为已验证。
+平台统称为 280013x，当前具体目标为 HXS320F2800137_EDE 和 PM 核心板，使用开发者提供的空白 DriverLib 工程及 Haawking IDE 2.3.17。接线、20 MHz 晶振、160 MHz 系统时钟、工程导入和 OTP 配置见[平台说明](examples/hx280013x/README.md)，产物与下载范围见[双HEX构建说明](docs/HX280013X_DUAL_HEX_BUILD.md)。其他型号/封装不视为已验证。
 
 28002x 工程中的 OTP 汇编、linker 和 DCSM 驱动需要按 280013x 重新核对。28002x 的调试配置和应用层补充读取步骤尚未在 280013x 上验证，不能直接作为该平台的必要操作。
 
@@ -105,7 +147,7 @@ ex00～ex02 已位于 `topics/dcsm/examples/hx280013x/`，其余名称用于规�
 | --- | --- | --- | --- |
 | [ex00_base_system](examples/hx280013x/ex00_base_system/README.md) | 建立未保护的基础系统 | 独立启动、LED、SCI、按键及模块处理结果正常 | 构建及产物检查通过；开发者确认上板符合预期（2026-10-24） |
 | [ex01_dcsm_secure_flash](examples/hx280013x/ex01_dcsm_secure_flash/README.md) | 保护模块代码与产品参数，完成密码解锁流程 | 锁定时正常调用，未授权读取受限，正确密码解锁后可读，断电后恢复保护；同时检查密码位置的可见性 | 开发配置及构建检查完成；开发者反馈当前上板通过（2026-10-24），分项证据待补录；密码隐藏对照未实现 |
-| [ex02_dcsm_debug](examples/hx280013x/ex02_dcsm_debug/README.md) | 观察调试连接、区域锁定与解锁后的访问权限 | 记录自动解锁行为，对照实时安全状态、普通 RAM 与安全 Flash 的读数；CSM 与 ECSL 的具体行为按本平台实测确认 | 应用及准备读取已实现；保留OTP源Exclude，无OTP ELF及双HEX构建通过；开发者反馈板级通过，分项证据待补录 |
+| [ex02_dcsm_debug](examples/hx280013x/ex02_dcsm_debug/README.md) | 观察调试连接、区域锁定与解锁后的访问权限 | 记录自动解锁行为，对照实时安全状态、普通 RAM 与安全 Flash 的读数；CSM 与 ECSL 的具体行为按本平台实测确认 | 应用及准备读取已实现；保留 OTP 源 Exclude，无 OTP ELF 及双 HEX 构建通过；开发者反馈板级通过，分项证据待补录 |
 | `ex03_dcsm_exeonly` | 比较普通安全保护与 execute-only | 模块保持可执行、独立参数区可用，同 Zone 数据读取入口对代码区的读取受到限制 | 规划中 |
 | `ex04_dcsm_secure_ram` | 保护 LS0 中的运行代码或工作数据 | 核对 LS0 分段归属，验证访问限制，以及 Flash 加载镜像到安全 RAM 的搬运 | 规划中 |
 | `ex05_dcsm_flash_api` | 更新受保护的产品参数或模块内容 | 核对目标芯片的 Flash API、运行位置、Zone 权限、信号量及编程规则，验证更新后内容 | 规划中 |
@@ -129,24 +171,22 @@ CMAC 安全启动暂不列入正式例程。确认该器件 BootROM 的认证流
 
 | 项目 | 280013x 的规划要求 |
 | --- | --- |
-| Flash 分区 | 按 280013x 的扇区和安全分组编号配置，不能沿用 28002x 的 sector 编号；若保留 `0x00610000` 至 `0x00613FFF` 地址范围，按数据手册对应扇区32至39 |
+| Flash 分区 | 按 280013x 的扇区和安全分组编号配置，不能沿用 28002x 的 sector 编号；若保留 `0x00610000` 至 `0x00613FFF` 地址范围，按数据手册对应扇区 32 至 39 |
 | RAM | 使用 LS0 及其安全分段，重新安排运行地址；不沿用 LS4 至 LS7 和 GS0 的内存声明 |
-| USER OTP | 按该平台的 `0x00640000`、`0x00640400` Zone 基址重排固定头部和 ZSB，核对14位 LINKPOINTER 及 `0x40` 字节的 ZSB 步长 |
+| USER OTP | 按该平台的 `0x00640000`、`0x00640400` Zone 基址重排固定头部和 ZSB，核对 14 位 LINKPOINTER 及 `0x40` 字节的 ZSB 步长 |
 | 密码与状态位 | 按该平台工厂预编程位选取密码，使用匹配的 SDK 判断 CSM 状态及执行 FORCESEC |
 | OTP 更新 | 固定字段一次规划；除 LINKPOINTER 的规定例外，不沿用 28002x 在已写字段中继续清位的修改方式 |
 | 例程间兼容 | 实施前列出共享配置及需变更字段，确认各例程是否可以使用同一颗已配置芯片 |
 
-ex01/ex02采用ZSB1，完整OTP模板和分组链接脚本已整理。ex01当前启用OTP源，ELF和 `_dcsm.hex` 含60字节OTP，普通HEX仅含程序Flash。ex02保留开发者的OTP源Exclude设置，ELF和两份HEX均无OTP；若另行启用OTP源，模板准备输出48字节ZSB配置，不输出指针。两例的ZSB密码及归属配置相同。构建不连接或编程器件；launch下载范围由实际ELF段决定，日常更新须核对产物范围。构建及下载边界见[双HEX说明](docs/HX280013X_DUAL_HEX_BUILD.md)。其余例程仍按上表规划。
+ex01/ex02 采用 ZSB1，完整 OTP 模板和分组链接脚本已整理。ex01 当前启用 OTP 源，ELF 和 `_dcsm.hex` 含 60 字节 OTP，普通 HEX 仅含程序 Flash。ex02 保留开发者的 OTP 源 Exclude 设置，ELF 和两份 HEX 均无 OTP；若另行启用两个 OTP 源，当前源码将输出 60 字节 OTP（12 字节 Z1 LINKPOINTER 与 48 字节 ZSB 配置）。两例的 ZSB 密码及归属配置相同。构建不连接或编程器件；launch 下载范围由实际 ELF 段决定，日常更新须核对产物范围。构建及下载边界见[双HEX说明](docs/HX280013X_DUAL_HEX_BUILD.md)。其余例程仍按上表规划。
 
 ### 验证记录与使用说明
 
 每个工程建立后，在自己的 README 中记录目标器件和工具版本、接线、构建与下载步骤、寄存器观察点及实际结果。通用验收包括独立启动、串口和 LED、正确与错误密码的读取对照、重复锁定与解锁，以及断电恢复保护；RAMOPEN 和 JTAGLOCK 另按各自目标验收。
 
-280013x ex00～ex02已有构建检查及开发者反馈的板级通过结论。ex02主动Exclude OTP的构建已通过，不作为待修复故障。分项寄存器值、OTP写后回读、切换轮数及日志仍待补录，详见[独立回归表](validation/hx280013x/REGRESSION_HX280013X_EX00_EX02.md)。28002x ex02的10轮历史测试独立保留，不作为280013x证据。
+280013x ex00～ex02 已有构建检查及开发者反馈的板级通过结论。ex02 主动 Exclude OTP 的构建已通过。分项寄存器值、OTP 写后回读、切换轮数及日志仍待补录，详见[独立回归表](validation/hx280013x/REGRESSION_HX280013X_EX00_EX02.md)。28002x ex02 的 10 轮历史测试独立保留，不作为 280013x 证据。
 
-资料核对依据为《HX2800137（DSC9.1E）与HX280025（DSC5.2）差异文档 V1.1》第7节、《Haawking_DSC280013x_数字信号控制器参考手册 V1.3》第5章，以及该平台数据手册第7.1节。已发现的 ZSB 图示、示例代码和编程规则记载差异，应在实施时对照器件 SDK 及官方说明确认。
-
-<!-- END 280013x PLAN -->
+资料核对依据为《HX2800137（DSC9.1E）与HX280025（DSC5.2）差异文档 V1.1》第 7 节、《Haawking_DSC280013x_数字信号控制器参考手册 V1.3》第 5 章，以及该平台数据手册第 7.1 节。已发现的 ZSB 图示、示例代码和编程规则记载差异，应在实施时对照器件 SDK 及官方说明确认。
 
 ## 开始实验前
 
