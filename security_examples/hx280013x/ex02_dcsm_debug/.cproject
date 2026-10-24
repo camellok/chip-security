@@ -29,13 +29,13 @@
             			
             <storageModule moduleId="cdtBuildSystem" version="4.0.0">
                 				
-                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf *.s *.map *.asm" description="" id="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.debug.1880970502" name="Debug" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=" parent="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.debug" postbuildStep="">
+                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf *.s *.map *.asm" description="" id="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.debug.1880970502" name="Debug" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=" parent="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.debug" prebuildStep="echo Preparing HEX outputs" postbuildStep="echo HEX outputs ready">
                     					
                     <folderInfo id="ilg.gnumcueclipse.managedbuild.cross.riscv.config.elf.debug.1880970502." name="/" resourcePath="">
                         						
                         <toolChain id="ilg.gnumcueclipse.managedbuild.cross.riscv.toolchain.elf.debug.1527829095" name="RISC-V Cross GCC" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.toolchain.elf.debug">
                             							
-                            <option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.addtools.createflash.1144248622" name="Create flash image" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.addtools.createflash" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+                            <option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.addtools.createflash.1144248622" name="Create flash image" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.addtools.createflash" useByScannerDiscovery="false" value="false" valueType="boolean"/>
                             							
                             <option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.addtools.createlisting.1570660925" name="Create extended listing" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.addtools.createlisting" useByScannerDiscovery="false" value="false" valueType="boolean"/>
                             							
@@ -111,7 +111,7 @@
                             							
                             <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="ilg.gnumcueclipse.managedbuild.cross.riscv.targetPlatform.1258911649" isAbstract="false" osList="all" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.targetPlatform"/>
                             							
-                            <builder buildPath="${workspace_loc:/hx280013x_ex02_dcsm_debug}/Debug" id="ilg.gnumcueclipse.managedbuild.cross.riscv.builder.1379810902" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.builder"/>
+                            <builder buildPath="${workspace_loc:/ex02_dcsm_debug}/Debug" id="ilg.gnumcueclipse.managedbuild.cross.riscv.builder.1379810902" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.builder"/>
                             							
                             <tool id="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.assembler.1501635887" name="GNU RISC-V Cross Assembler" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.tool.assembler">
                                 								
@@ -183,8 +183,6 @@
                                 <option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.gcsections.439424482" name="Remove unused sections (-Xlinker --gc-sections)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.gcsections" useByScannerDiscovery="false" value="true" valueType="boolean"/>
                                 								
                                 <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.paths.2043729417" name="Library search path (-L)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.paths" useByScannerDiscovery="false" valueType="libPaths">
-                                    									
-                                    <listOptionValue builtIn="false" value="../src"/>
                                     <listOptionValue builtIn="false" value="../lib"/>
                                     									
                                     <listOptionValue builtIn="false" value="../haawking-drivers/ldscripts"/>
@@ -263,7 +261,7 @@
                     					
                     <sourceEntries>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" excluding="Security/otp|haawking-drivers/ldscripts/HXS320F2800137_EDE_link_FLASH.ld" kind="sourcePath" name=""/>
+                        <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" excluding="Security/hx280013x_dcsm_z1otp.S|Security/hx280013x_dcsm_z2otp.S" kind="sourcePath" name=""/>
                         					
                     </sourceEntries>
                     				
@@ -279,7 +277,7 @@
     	
     <storageModule moduleId="cdtBuildSystem" version="4.0.0">
         		
-        <project id="hx280013x_ex02_dcsm_debug.ilg.gnumcueclipse.managedbuild.cross.riscv.target.elf" name="Executable" projectType="ilg.gnumcueclipse.managedbuild.cross.riscv.target.elf"/>
+        <project id="ex02_dcsm_debug.ilg.gnumcueclipse.managedbuild.cross.riscv.target.elf" name="Executable" projectType="ilg.gnumcueclipse.managedbuild.cross.riscv.target.elf"/>
         	
     </storageModule>
     	

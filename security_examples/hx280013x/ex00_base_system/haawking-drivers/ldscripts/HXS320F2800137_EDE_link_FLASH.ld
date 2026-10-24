@@ -120,6 +120,8 @@ SECTIONS
     /* Text segment */
     text ALIGN(0x10):
     {
+        *(module_code)
+        *(module_params)
         *(.text.init)
         *(.text)
         *(.text*)
@@ -155,6 +157,7 @@ SECTIONS
     {
         *(.ifr_register)
     } > IFR_REGISTER_FILE
+
 
     /* End */
     _end = .;

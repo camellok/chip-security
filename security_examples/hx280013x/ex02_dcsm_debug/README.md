@@ -10,9 +10,9 @@
 
 ## 构建与下载
 
-导入 `hx280013x_ex02_dcsm_debug`，让 IDE 重新生成构建文件。默认产物为 `Debug/hx280013x_ex02_dcsm_debug.elf`、`.hex`、`.map`，APP不含OTP。使用应用层 `src/HXS320F2800137_EDE_link_FLASH.ld`，不得误选厂商原始完整 Flash 布局。
+导入 `ex02_dcsm_debug`，让 IDE 重新生成构建文件。默认APP ELF和普通HEX不含OTP。每次Build生成 `Debug/ex02_dcsm_debug.hex`（仅程序Flash）和 `Debug/ex02_dcsm_debug_dcsm.hex`（程序Flash+DCSM配置），Clean/Rebuild同时清除两份HEX。构建原理、失败清理及手动命令见[双HEX构建说明](../../../docs/HX280013X_DUAL_HEX_BUILD.md)。使用应用层 `haawking-drivers/ldscripts/HXS320F2800137_EDE_link_FLASH.ld`，工程内已删除未使用的厂商原版Flash/RAM主脚本；[具体差异](../../../docs/HX280013X_LINKER_DIFF.md)已记录。
 
-launch 保留模板自动解锁流程，Zone1 演示密码与 `password_values.h` 一致。独立 OTP 准备由 `Security/otp/BuildOtp.ps1` 手动构建；脚本只生成文件，不编程器件。本例采用开发配置，PSWDLOCK保持出厂值，密码隐藏未实现。
+launch 保留模板自动解锁流程，Zone1演示密码与 `Security/hx280013x_dcsm_z1otp.S` 的四个显式密码字、`Security/password.h` 的应用解锁密钥保持一致。Post-build自动调用 `Security/BuildOtp.ps1` 重新构建OTP准备数据，并合成 `_dcsm.hex`；也可单独手动构建。所有脚本只生成文件，不编程器件。本例采用开发配置，PSWDLOCK保持出厂值，密码隐藏未实现。
 
 ## 简要验收
 

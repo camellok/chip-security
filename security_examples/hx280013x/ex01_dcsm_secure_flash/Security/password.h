@@ -1,16 +1,25 @@
-/* Public training key for Zone1 ZSB1; never a production credential. */
-#ifndef PASSWORD_H
-#define PASSWORD_H
+/***************************************************************
+ * Copyright (c) 2019-2026, Beijing Haawking Technology Co., Ltd
+ *
+ * Author: Silin Luo
+ * Email : silin.luo@mail.haawking.com
+ * File  : password.h
+ * Description:
+ ***************************************************************/
+
+#ifndef __PASSWORD_H_
+#define __PASSWORD_H_
+
 #include "driverlib.h"
-#include "password_values.h"
-#if (DEMO_Z1_KEY1 & 0x4D7FFFFFUL) != DEMO_Z1_KEY1
-#error "ZSB1 key conflicts with the documented factory CSMPSWD1 bits"
-#endif
+
+// Note1: Demo password is for training only.
+//        Production password should not be stored as plaintext in bootloader or application firmware.
 static const DCSM_CSMPasswordKey s_z1_demo_key =
 {
-    .csmKey0 = DEMO_Z1_KEY0,
-    .csmKey1 = DEMO_Z1_KEY1,
-    .csmKey2 = DEMO_Z1_KEY2,
-    .csmKey3 = DEMO_Z1_KEY3
+    .csmKey0 = 0x11111111UL,
+    .csmKey1 = 0x00222222UL,
+    .csmKey2 = 0x33333333UL,
+    .csmKey3 = 0x44444444UL
 };
+
 #endif

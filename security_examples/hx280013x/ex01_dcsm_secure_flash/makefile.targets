@@ -1,0 +1,17 @@
+# Included by the IDE-generated Debug/makefile; do not edit generated recipes.
+# Actual scripts are prerequisites so failures are fatal. CDT prefixes its
+# configured pre/post command recipes with '-', which otherwise ignores errors.
+.PHONY: clean-hex-images generate-hex-images
+
+pre-build clean: clean-hex-images
+
+clean-hex-images:
+	powershell.exe -NoProfile -ExecutionPolicy Bypass -File "../Security/BuildHex.ps1" -ProjectName "ex01_dcsm_secure_flash" -BuildDirectory "." -Clean
+
+post-build: generate-hex-images
+
+generate-hex-images:
+	powershell.exe -NoProfile -ExecutionPolicy Bypass -File "../Security/BuildHex.ps1" -ProjectName "ex01_dcsm_secure_flash" -BuildDirectory "."
+
+# Linker edits must relink the APP before converting its load image.
+ex01_dcsm_secure_flash.elf: ../haawking-drivers/ldscripts/HXS320F2800137_EDE_link_FLASH.ld ../haawking-drivers/ldscripts/Peripheral.ld ../haawking-drivers/ldscripts/BootROM.ld

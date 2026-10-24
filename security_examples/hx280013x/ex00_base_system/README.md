@@ -10,7 +10,7 @@
 
 ## 构建与下载
 
-导入 `hx280013x_ex00_base_system`，让 IDE 重新生成构建文件。默认产物为 `Debug/hx280013x_ex00_base_system.elf`、`.hex`、`.map`，APP不含OTP。使用应用层 `src/HXS320F2800137_EDE_link_FLASH.ld`，不得误选厂商原始完整 Flash 布局。
+导入 `ex00_base_system`，让 IDE 重新生成构建文件。默认产物为 `Debug/ex00_base_system.elf`、`.hex`、`.map`，APP不含OTP。使用应用层 `haawking-drivers/ldscripts/HXS320F2800137_EDE_link_FLASH.ld`，工程内已删除未使用的厂商原版Flash/RAM主脚本；[具体差异](../../../docs/HX280013X_LINKER_DIFF.md)已记录。
 
 ## 简要验收
 
@@ -20,4 +20,4 @@
 
 ## 当前验证状态
 
-2026-10-23：构建及产物检查通过，板级待验证；详细证据与待填项见[280013x独立回归表](../../../docs/REGRESSION_HX280013X_EX00_EX02.md)。未继承28002x平台的板级验收结果。
+2026-10-23构建及产物检查通过；2026-10-24开发者反馈上板验证通过、符合预期现象。尚未附逐项日志，结果见[280013x独立回归表](../../../docs/REGRESSION_HX280013X_EX00_EX02.md)。未继承28002x平台的板级验收结果。

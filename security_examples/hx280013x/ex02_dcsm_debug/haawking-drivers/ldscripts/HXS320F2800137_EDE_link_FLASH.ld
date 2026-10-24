@@ -54,7 +54,9 @@ MEMORY
     RAMM0(rwx):                    ORIGIN = 0x00000800, LENGTH = 0x00003800     /* Internal RAM M0 */
     RAMLS0(rwx):                   ORIGIN = 0x00010000, LENGTH = 0x00004000     /* Internal RAM LS0 */
     BEGIN(rwx):                    ORIGIN = 0x00600000, LENGTH = 0x00000010     /* Code Entry */
-    FLASH(rwx):                    ORIGIN = 0x00600010, LENGTH = 0x0003FFF0     /* Internal Flash Bank0 */
+    FLASH(rwx):                    ORIGIN = 0x00600010, LENGTH = 0x0000FFF0     /* Internal Flash Bank0 */
+    FLASH_ZONE1_CODE(rx):          ORIGIN = 0x00610000, LENGTH = 0x00004000     /* Zone1 module code: sector32-39 */
+    FLASH_ZONE1_PARAMS(r):         ORIGIN = 0x00614000, LENGTH = 0x00004000     /* Zone1 parameters: sector40-47 */
     IER_REGISTER_FILE(rw):         ORIGIN = 0x00400C10, LENGTH = 0x00000004     /* IER Regitser */
     IFR_REGISTER_FILE(rw):         ORIGIN = 0x00400D10, LENGTH = 0x00000004     /* IFR Regitser */
 }
@@ -155,6 +157,22 @@ SECTIONS
     {
         *(.ifr_register)
     } > IFR_REGISTER_FILE
+
+    . = 0x00610000;
+    module_code ALIGN(0x10):
+    {
+        KEEP(*(module_code))
+    } > FLASH_ZONE1_CODE
+
+    . = 0x00614000;
+    module_params ALIGN(0x10):
+    {
+        KEEP(*(module_params))
+    } > FLASH_ZONE1_PARAMS
+
+    ASSERT(SIZEOF(module_code) <= 0x4000, "Module code overflows sector32-39")
+    ASSERT(SIZEOF(module_params) == 8, "Demo parameters must be two uint32_t words")
+    ASSERT(__FLASH_DATA_END <= 0x00610000, "APP load image reaches secure Flash")
 
     /* End */
     _end = .;
